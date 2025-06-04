@@ -45,7 +45,13 @@ The Angular frontend follows a modular structure with lazy-loading for optimal p
    cd Gestion-et-Suivi-des-Missions-AVA-EY
    ```
 
-2. Run the setup script:
+2. Set up environment variables:
+   ```
+   cp .env.example .env
+   # Edit the .env file with your configuration values
+   ```
+
+3. Run the setup script:
    ```powershell
    .\scripts\setup-dev-environment.ps1
    ```
@@ -139,6 +145,22 @@ devops-Projet-Gestion-Missions/
 ├── Jenkinsfile                     # CI/CD pipeline definition
 └── README.md                       # This file
 ```
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` folder:
+
+- `getting-started.md`: Detailed setup guide
+- `devops-workflow-guide.md`: DevOps workflow documentation
+- `devops-runbook.md`: Operations runbook
+- `maintenance-guide.md`: System maintenance guide
+- `production-deployment-guide.md`: Production deployment steps
+- `monitoring-instructions.md`: Monitoring setup guide
+- `environment-setup.md`: Environment variables configuration
+- `github-jenkins-integration.md`: GitHub and Jenkins integration guide
+- `manual-jenkins-configuration.md`: Step-by-step Jenkins setup instructions
+- `sonarqube-github-integration.md`: SonarQube setup with GitHub
+- `sonarqube-integration-guide.md`: Detailed SonarQube configuration
 
 ## License
 
