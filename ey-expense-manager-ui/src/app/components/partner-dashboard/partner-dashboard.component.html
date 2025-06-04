@@ -1,0 +1,193 @@
+<div class="partner-dashboard" [class.dark-mode]="isDarkMode">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <!-- Back button for admins viewing partner dashboard -->
+      <button *ngIf="viewingAsAdmin" class="btn-back" (click)="backToAdmin()">
+        <mat-icon>arrow_back</mat-icon> Back to Admin
+      </button>
+      
+      <h1>{{viewingAsAdmin ? 'Partner Stats' : 'Partner Dashboard'}}</h1>
+      
+      <!-- Partner selector for admins -->
+      <div *ngIf="isAdmin && !selectedPartnerId" class="partner-selector">
+        <mat-form-field>
+          <mat-label>Select Partner</mat-label>
+          <mat-select [(value)]="selectedPartnerId" (selectionChange)="onPartnerChange($event.value)">
+            <mat-option *ngFor="let partner of partners" [value]="partner.id">
+              {{ partner.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <p class="header-subtitle">{{viewingAsAdmin ? 'Viewing stats for' : 'Welcome'}}, {{ partnerName }}</p>
+      <p class="current-date">{{ currentMonth }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon theme-toggle" (click)="toggleDarkMode()">
+        <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading your dashboard data...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="error-container">
+    <p class="error-message">{{ error }}</p>
+    <button class="btn-primary" (click)="loadPartnerData()">
+      <mat-icon>refresh</mat-icon> Retry
+    </button>
+  </div>
+
+  <!-- Dashboard content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <!-- Budget summary cards -->
+    <div class="summary-cards">
+      <div class="card ava-total">
+        <div class="card-content">
+          <h3>Total Budget</h3>
+          <div class="amount-container">
+            <div class="amount-compact">{{ formatCompactCurrency(totalAva) }}</div>
+            <div class="amount-full">{{ formatCurrency(totalAva) }}</div>
+          </div>
+        </div>
+        <div class="card-icon">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+      </div>
+
+      <div class="card ava-used">
+        <div class="card-content">
+          <h3>Used Budget</h3>
+          <div class="amount-container">
+            <div class="amount-compact">{{ formatCompactCurrency(usedAva) }}</div>
+            <div class="amount-full">{{ formatCurrency(usedAva) }}</div>
+          </div>
+          <div class="progress-indicator">
+            <div class="progress-bar" [style.width.%]="usagePercentage"></div>
+            <span class="percentage">{{ usagePercentage }}%</span>
+          </div>
+        </div>
+        <div class="card-icon">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+      </div>
+
+      <div class="card ava-remaining">
+        <div class="card-content">
+          <h3>Remaining Budget</h3>
+          <div class="amount-container">
+            <div class="amount-compact">{{ formatCompactCurrency(remainingAva) }}</div>
+            <div class="amount-full">{{ formatCurrency(remainingAva) }}</div>
+          </div>
+          <div class="progress-indicator">
+            <div class="progress-bar" [style.width.%]="100 - usagePercentage"></div>
+            <span class="percentage">{{ 100 - usagePercentage }}%</span>
+          </div>
+        </div>
+        <div class="card-icon">
+          <mat-icon>savings</mat-icon>
+        </div>
+      </div>
+
+      <div class="card missions-total">
+        <div class="card-content">
+          <h3>Your Missions</h3>
+          <div class="mission-stats">
+            <div class="mission-stat">
+              <span class="stat-value">{{ totalMissions }}</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="mission-stat">
+              <span class="stat-value">{{ activeMissions }}</span>
+              <span class="stat-label">Active</span>
+            </div>
+            <div class="mission-stat">
+              <span class="stat-value">{{ completedMissions }}</span>
+              <span class="stat-label">Completed</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-icon">
+          <mat-icon>work</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and data section -->
+    <div class="charts-grid">
+      <div class="chart-container expenses-trend">
+        <h3 class="section-title">
+          <mat-icon>trending_up</mat-icon>
+          Expense Trends
+        </h3>
+        <div class="chart-body">
+          <canvas #expensesTrendChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-container mission-status">
+        <h3 class="section-title">
+          <mat-icon>pie_chart</mat-icon>
+          Mission Status
+        </h3>
+        <div class="chart-body">
+          <canvas #missionStatusChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-container expense-categories">
+        <h3 class="section-title">
+          <mat-icon>category</mat-icon>
+          Expense Categories
+        </h3>
+        <div class="chart-body">
+          <canvas #expenseCategoriesChart></canvas>
+        </div>
+      </div>
+
+      <div class="recent-expenses">
+        <h3 class="section-title">
+          <mat-icon>receipt</mat-icon>
+          Recent Expenses
+        </h3>
+        <div class="expenses-list">
+          <div *ngIf="recentExpenses.length === 0" class="no-expenses">
+            No recent expenses found
+          </div>
+          <div *ngFor="let expense of recentExpenses" class="expense-item">
+            <div class="expense-icon">
+              <mat-icon>receipt</mat-icon>
+            </div>
+            <div class="expense-details">
+              <div class="expense-title">{{ expense.title }}</div>
+              <div class="expense-mission">{{ expense.missionName || 'No mission name' }}</div>
+              <div class="expense-date">{{ formatDate(expense.createdDate) }}</div>
+            </div>
+            <div class="expense-amount">{{ formatCurrency(expense.convertedAmount) }}</div>
+          </div>
+        </div>
+        <div class="view-all">
+          <a routerLink="/expenses" class="btn-link">
+            View All Expenses <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-buttons">
+      <a routerLink="/missions" class="btn-primary">
+        <mat-icon>list</mat-icon> View Missions
+      </a>
+      <a routerLink="/expenses/create" class="btn-secondary">
+        <mat-icon>add</mat-icon> Create Expense
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+<div class="user-list-container dark-mode">
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <h1>User Management</h1>
+      <p>Team members and access control</p>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          type="text" 
+          [formControl]="searchTermControl" 
+          placeholder="Search users..." 
+          class="form-control"
+        />
+        <button *ngIf="searchTermControl.value" class="clear-search" (click)="searchTermControl.setValue('')">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div class="button-container">
+      <a [routerLink]="['/register']" class="btn btn-create">
+        <mat-icon>person_add</mat-icon>
+        <span>Add New User</span>
+      </a>
+      <button class="btn btn-excel" title="Export to Excel" (click)="downloadExcel()">
+        <mat-icon>table_chart</mat-icon>
+        <span>Excel</span>
+      </button>
+      <button class="btn btn-pdf" title="Export to PDF" (click)="downloadPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-options">
+    <div class="filter-select">
+      <label for="roleFilter">
+        <mat-icon class="filter-icon">how_to_reg</mat-icon>
+        Filter by Role:
+      </label>
+      <select id="roleFilter" [formControl]="roleControl" class="form-control">
+        <option value="all">All Roles</option>
+        <option [value]="roles.Admin">Admin</option>
+        <option [value]="roles.User">User</option>
+        <option [value]="roles.Manager">Manager</option>
+        <option [value]="roles.Associer">Partner</option>
+        <option [value]="roles.Employe">Employe</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-indicator">
+    <mat-icon class="loading-icon">sync</mat-icon>
+    <p>Loading users...</p>
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <mat-icon class="alert-icon">error</mat-icon>
+    {{ errorMessage }}
+    <button (click)="loadUsers()" class="btn-retry">
+      <mat-icon>refresh</mat-icon> Try Again
+    </button>
+  </div>
+  
+  <div *ngIf="!isLoading && !errorMessage && filteredUsers.length === 0" class="no-users">
+    <mat-icon class="empty-icon">person_off</mat-icon>
+    <p>No users found matching your criteria.</p>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && filteredUsers.length > 0" class="users-table-container">
+    <div class="table-responsive">
+      <table class="table users-table">
+        <thead>
+          <tr>
+            <th>Profile</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>GPN</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers">
+            <td class="user-avatar">
+              <img *ngIf="user.profileImageUrl" 
+                  [src]="user.profileImageUrl"
+                  alt="Profile image" 
+                  class="profile-image"
+                  (error)="handleImageError($event)">
+              <div *ngIf="!user.profileImageUrl" class="avatar-placeholder">
+                {{ user.nameUser.charAt(0).toUpperCase() }}{{ user.surname.charAt(0).toUpperCase() }}
+              </div>
+            </td>
+            <td>{{ user.idUser }}</td>
+            <td>
+              <div class="user-name">
+                <mat-icon class="user-icon">{{ getUserIcon(user.role) }}</mat-icon>
+                {{ user.nameUser }} {{ user.surname }}
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="role-badge role-badge-{{ getRoleName(user.role).toLowerCase() }}">
+                <mat-icon class="role-icon">{{ getRoleIcon(user.role) }}</mat-icon>
+                {{ getRoleName(user.role) }}
+              </span>
+            </td>
+            <td>{{ user.gpn }}</td>
+            <td class="actions-cell">
+              <a [routerLink]="['/users', user.id]" class="btn-action btn-view" title="View">
+                <mat-icon>visibility</mat-icon>
+              </a>
+              <a [routerLink]="['/users', user.id, 'edit']" class="btn-action btn-edit" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </a>
+              <button (click)="deleteUser(user.id)" class="btn-action btn-delete" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

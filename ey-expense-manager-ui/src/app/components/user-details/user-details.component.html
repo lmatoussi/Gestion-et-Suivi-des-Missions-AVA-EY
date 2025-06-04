@@ -1,0 +1,107 @@
+<div class="user-details-container dark-mode">
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <h1>User Profile</h1>
+      <p>Complete user information and account details</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-indicator">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <p>Loading user details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+    <button (click)="loadUserDetails(user?.id || 0)" class="btn-retry">Try Again</button>
+  </div>
+
+  <div *ngIf="user && !isLoading" class="profile-container">
+    <div class="profile-header">
+      <div class="profile-image-container">
+        <img *ngIf="user.profileImageUrl" 
+             [src]="user.profileImageUrl" 
+             alt="Profile picture"
+             class="profile-image"
+             (error)="handleImageError($event)">
+        <div *ngIf="!user.profileImageUrl" class="avatar-placeholder">
+          {{ user.nameUser.charAt(0).toUpperCase() }}{{ user.surname.charAt(0).toUpperCase() }}
+        </div>
+      </div>
+      <div class="profile-title">
+        <h2>{{ user.nameUser }} {{ user.surname }}</h2>
+        <span class="role-badge role-badge-{{ getRoleName(user.role).toLowerCase() }}">
+          {{ getRoleName(user.role) }}
+        </span>
+        <p class="user-id">User ID: <span>#{{ user.idUser }}</span></p>
+      </div>
+      <div class="action-buttons">
+        <a [routerLink]="['/users', user.id, 'edit']" class="btn btn-edit">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
+        <button (click)="deleteUser(user.id)" class="btn btn-delete">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-content">
+      <div class="info-card account-info">
+        <div class="card-header">
+          <i class="fas fa-user-circle"></i>
+          <h3>Account Information</h3>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">{{ user.nameUser }} {{ user.surname }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ user.email }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">GPN</div>
+            <div class="info-value">{{ user.gpn || 'Not assigned' }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Role</div>
+            <div class="info-value">{{ getRoleName(user.role) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card system-info">
+        <div class="card-header">
+          <i class="fas fa-shield-alt"></i>
+          <h3>System Information</h3>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <div class="info-label">User ID</div>
+            <div class="info-value">{{ user.idUser }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">System ID</div>
+            <div class="info-value">{{ user.id }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Account Status</div>
+            <div class="info-value">
+              <span class="status-badge status-active">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="back-button-container">
+        <button class="btn btn-back" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Back to Users
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+// _mixins.scss - Theme mixins and reusable style patterns
+
+// Theme mixins
+@mixin light-theme {
+    --bg-primary: #{$white};
+    --bg-secondary: #{$gray-light};
+    --bg-card: #{$white};
+    --text-primary: #{$black};
+    --text-secondary: #{$gray-dark};
+    --border-color: #{$gray-medium};
+    --shadow: #{$shadow};
+    --icon-color: #{$primary-color};
+    --icon-hover: #{$primary-color-dark};
+    --chart-bg: #{$gray-light};
+    --chart-grid: #{$gray-medium};
+    --chart-tooltip-bg: #{rgba($white, 0.95)};
+    --chart-tooltip-border: #{$gray-medium};
+  }
+  
+  @mixin dark-theme {
+    --bg-primary: #{$dark-bg};
+    --bg-secondary: #252530;
+    --bg-card: #{$dark-card};
+    --text-primary: #{$dark-text};
+    --text-secondary: #b0b0b0;
+    --border-color: #444450;
+    --shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    --icon-color: #{$primary-color};
+    --icon-hover: #{$primary-color-dark};
+    --chart-bg: #{rgba($dark-bg, 0.5)};
+    --chart-grid: #{rgba($gray-dark, 0.3)};
+    --chart-tooltip-bg: #{rgba($dark-card, 0.95)};
+    --chart-tooltip-border: #{$gray-dark};
+  }
+  
+  // Card hover effect mixin
+  @mixin card-hover {
+    transition: all $transition-speed ease;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: $shadow-hover;
+      border-left-color: $primary-color;
+    }
+  }
+  
+  // Icon styling mixin
+  @mixin icon-style {
+    color: var(--icon-color);
+    transition: color $transition-speed ease, transform $transition-speed ease;
+    
+    &:hover {
+      color: var(--icon-hover);
+      transform: scale(1.1);
+    }
+  }
+  
+  // Material icon base styles
+  @mixin material-icons-base {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }

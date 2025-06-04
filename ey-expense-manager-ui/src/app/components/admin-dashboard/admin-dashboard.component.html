@@ -1,0 +1,654 @@
+<div class="admin-dashboard" [class.dark-mode]="isDarkMode">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-content">
+            <h1>{{ isAdmin ? 'Admin Dashboard' : 'Dashboard' }}</h1>
+            <p>{{ currentDateDisplay }}</p>
+        </div>
+        <div class="banner-actions">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="yearFilter">
+                        <mat-icon>calendar_today</mat-icon>
+                        <span>Year:</span>
+                    </label>
+                    <select id="yearFilter" (change)="onYearChange($event)">
+                        <option *ngFor="let year of years" [value]="year" [selected]="year === selectedYear">{{ year }}</option>
+                    </select>
+                </div>
+                <!-- Only show associer filter for admin users -->
+                <div class="filter-group" *ngIf="canViewAllPartners()">
+                    <label for="associerFilter">
+                        <mat-icon>people_alt</mat-icon>
+                        <span>Partner:</span>
+                    </label>
+                    <select id="associerFilter" (change)="onAssocierChange($event)">
+                        <option value="">All Partners</option>
+                        <option *ngFor="let associer of associers" [value]="associer.id">{{ associer.name }}</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="timerangeFilter">
+                        <mat-icon>date_range</mat-icon>
+                        <span>Time Range:</span>
+                    </label>
+                    <select id="timerangeFilter" (change)="changeTimeRange($event)">
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year" selected>This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button (click)="toggleDarkMode()" class="btn btn-icon theme-toggle" [class.dark-active]="isDarkMode" title="Toggle Dark Mode">
+                    <mat-icon class="theme-icon">{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+                </button>
+                <!-- Only show User List button to admins -->
+                <button *ngIf="navigationService.isAdmin()" routerLink="/admin/users" class="btn btn-primary">
+                    <mat-icon>people</mat-icon> User List
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading dashboard data...</p>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="error-container">
+        <p class="error-message">{{ error }}</p>
+        <button (click)="loadDashboardData()">
+            <mat-icon>refresh</mat-icon> Retry
+        </button>
+    </div>
+
+    <!-- Dashboard content -->
+    <div class="dashboard-content" *ngIf="!loading && !error">
+        <!-- Budget Alerts Banner -->
+        <div class="budget-alerts-banner" *ngIf="budgetAlerts.length > 0">
+            <div class="alert-container">
+                <div class="alert-icon">
+                    <mat-icon class="warning-icon">warning</mat-icon>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-count">{{ budgetAlerts.length }} Alert{{ budgetAlerts.length > 1 ? 's' : '' }}</div>
+                    <div class="alert-message">{{ budgetAlerts[0].message }}</div>
+                </div>
+                <button class="btn-view-all" (click)="openAlertsModal()">
+                    View All
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards With Improved Number Formatting -->
+        <div class="summary-cards">
+            <div class="card ava-total">
+                <div class="card-content">
+                    <h3>Total AVA</h3>
+                    <div class="amount-container">
+                        <div class="amount-compact">{{ formatCompactCurrency(totalAva) }}</div>
+                        <div class="amount-full">{{ formatCurrency(totalAva) }}</div>
+                    </div>
+                </div>
+                <div class="card-icon">
+                    <mat-icon>account_balance_wallet</mat-icon>
+                </div>
+            </div>
+
+            <div class="card ava-used">
+                <div class="card-content">
+                    <h3>Used AVA</h3>
+                    <div class="amount-container">
+                        <div class="amount-compact">{{ formatCompactCurrency(usedAva) }}</div>
+                        <div class="amount-full">{{ formatCurrency(usedAva) }}</div>
+                    </div>
+                    <div class="progress-indicator">
+                        <div class="progress-bar" [style.width.%]="calculatePercentage(usedAva, totalAva)"></div>
+                        <span class="percentage">{{ calculatePercentage(usedAva, totalAva) }}%</span>
+                    </div>
+                </div>
+                <div class="card-icon">
+                    <mat-icon>shopping_cart</mat-icon>
+                </div>
+            </div>
+
+            <div class="card ava-remaining">
+                <div class="card-content">
+                    <h3>Remaining AVA</h3>
+                    <div class="amount-container">
+                        <div class="amount-compact">{{ formatCompactCurrency(remainingAva) }}</div>
+                        <div class="amount-full">{{ formatCurrency(remainingAva) }}</div>
+                    </div>
+                    <div class="progress-indicator">
+                        <div class="progress-bar" [style.width.%]="calculatePercentage(remainingAva, totalAva)"></div>
+                        <span class="percentage">{{ calculatePercentage(remainingAva, totalAva) }}%</span>
+                    </div>
+                </div>
+                <div class="card-icon">
+                    <mat-icon>savings</mat-icon>
+                </div>
+            </div>
+
+            <div class="card missions-total">
+                <div class="card-content">
+                    <h3>Total Missions</h3>
+                    <div class="amount-container">
+                        <div class="amount-compact">{{ totalMissions }}</div>
+                    </div>
+                    <p class="subtitle">Active projects</p>
+                </div>
+                <div class="card-icon">
+                    <mat-icon>work</mat-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partner Quick Access Section -->
+        <div class="card partner-access-card">
+            <div class="card-header">
+                <h3>
+                    <mat-icon>people</mat-icon>
+                    Partner Quick Access
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="partner-selector-container">
+                    <mat-form-field appearance="fill">
+                        <mat-label>Select Partner</mat-label>
+                        <mat-select [(ngModel)]="selectedPartnerId">
+                            <mat-option *ngFor="let partner of partners" [value]="partner.id">
+                                {{ partner.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <button mat-raised-button color="primary" 
+                            [disabled]="!selectedPartnerId" 
+                            (click)="viewPartnerDashboard(selectedPartnerId!)">
+                        <mat-icon>visibility</mat-icon>
+                        View Partner Dashboard
+                    </button>
+                </div>
+                <div class="partner-action-hint" *ngIf="partners.length > 0">
+                    Select a partner to view their specific dashboard and statistics
+                </div>
+                <div class="partner-action-hint" *ngIf="partners.length === 0">
+                    No partners available in the system
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabbed Navigation for Detailed Stats -->
+        <div class="dashboard-tabs">
+            <div class="tabs-header">
+                <button 
+                    *ngFor="let tab of dashboardTabs; let i = index" 
+                    class="tab-button" 
+                    [class.active]="selectedTab === i"
+                    (click)="selectTab(i)">
+                    <mat-icon>{{ getTabIcon(i) }}</mat-icon>
+                    {{ tab.name }}
+                </button>
+                
+                <!-- Only show export dropdown for admins and managers -->
+                <div class="export-dropdown" *ngIf="navigationService.canExportReports()">
+                    <button class="btn btn-secondary dropdown-toggle" (click)="toggleExportMenu()">
+                        <mat-icon>download</mat-icon> Export
+                    </button>
+                    <div class="dropdown-menu" [class.show]="showExportMenu">
+                        <button class="dropdown-item" (click)="downloadFullReport()">
+                            <mat-icon>description</mat-icon> Full Report
+                        </button>
+                        <button class="dropdown-item" (click)="exportDashboardData('excel')">
+                            <mat-icon>table_chart</mat-icon> Excel
+                        </button>
+                        <button class="dropdown-item" (click)="exportDashboardData('pdf')">
+                            <mat-icon>picture_as_pdf</mat-icon> PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs-content">
+                <!-- Tab 1: Budget Overview -->
+                <div class="tab-pane" [class.active]="selectedTab === 0">
+                    <div class="tab-grid">
+                        <!-- Budget Performance Metrics -->
+                        <div class="metrics-container">
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-name">Budget Utilization</div>
+                                    <div class="metric-value">{{ budgetUtilizationRate }}%</div>
+                                    <div class="metric-change" [ngClass]="{'positive': budgetUtilizationRate < 80, 'negative': budgetUtilizationRate >= 80}">
+                                        <mat-icon>{{ budgetUtilizationRate >= 80 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                                        {{ budgetUtilizationRate >= 80 ? 'High Utilization' : 'Healthy' }}
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-name">Budget Growth Rate</div>
+                                    <div class="metric-value">{{ budgetGrowthRate }}%</div>
+                                    <div class="metric-change positive">
+                                        <mat-icon>trending_up</mat-icon>
+                                        YoY Growth
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-name">Expense Growth</div>
+                                    <div class="metric-value">{{ expenseGrowthRate }}%</div>
+                                    <div class="metric-change" [ngClass]="{'positive': expenseGrowthRate <= budgetGrowthRate, 'negative': expenseGrowthRate > budgetGrowthRate}">
+                                        <mat-icon>{{ expenseGrowthRate <= budgetGrowthRate ? 'trending_down' : 'trending_up' }}</mat-icon>
+                                        {{ expenseGrowthRate <= budgetGrowthRate ? 'Below Budget Growth' : 'Above Budget Growth' }}
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-name">Avg. Expense/Partner</div>
+                                    <div class="metric-value">{{ formatCompactCurrency(averageExpensePerAssocier) }}</div>
+                                    <div class="metric-change">
+                                        <mat-icon>show_chart</mat-icon>
+                                        Based on {{ associerAvaData?.length || 0 }} Partners
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Budget Forecast Insights -->
+                        <div class="forecast-container" *ngIf="forecastData && forecastInsights">
+                            <h3 class="section-title">Budget Forecast</h3>
+                            <div class="forecast-insights">
+                                <div class="insight-item" [ngClass]="{'warning': forecastInsights.projectedOverspend}">
+                                    <div class="insight-icon">
+                                        <mat-icon>{{ forecastInsights.projectedOverspend ? 'error_outline' : 'check_circle_outline' }}</mat-icon>
+                                    </div>
+                                    <div class="insight-content">
+                                        <h4>Projected Status</h4>
+                                        <p>
+                                            {{ forecastInsights.projectedOverspend ? 
+                                               'Budget may exceed by ' + forecastInsights.projectedDate : 
+                                               'Within limits through ' + forecastInsights.projectedDate }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="insight-item">
+                                    <div class="insight-icon">
+                                        <mat-icon>lightbulb_outline</mat-icon>
+                                    </div>
+                                    <div class="insight-content">
+                                        <h4>Recommended Action</h4>
+                                        <p>{{ forecastInsights.recommendedAction }}</p>
+                                    </div>
+                                </div>
+                                <div class="confidence-container">
+                                    <div class="confidence-label">Forecast Confidence</div>
+                                    <div class="confidence-score">{{ forecastInsights.confidenceScore }}%</div>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-progress" [style.width.%]="forecastInsights.confidenceScore"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="chart-container" *ngIf="avaData">
+                            <h3 class="section-title">Budget Distribution</h3>
+                            <div class="chart-body">
+                                <canvas #avaUsageChart id="avaUsageChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" *ngIf="avaTrendData">
+                            <h3 class="section-title">Budget Trends</h3>
+                            <div class="chart-body">
+                                <canvas #avaTrendChart id="avaTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" *ngIf="forecastData">
+                            <h3 class="section-title">Budget Forecast</h3>
+                            <div class="chart-body">
+                                <canvas #forecastChart id="forecastChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Missions -->
+                <div class="tab-pane" [class.active]="selectedTab === 1">
+                    <div class="tab-grid">
+                        <div class="chart-container" *ngIf="missionStatusData">
+                            <h3 class="section-title">Mission Status</h3>
+                            <div class="chart-body">
+                                <canvas #missionStatusChart id="missionStatusChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" *ngIf="expenseByTypeData">
+                            <h3 class="section-title">Expenses by Mission Type</h3>
+                            <div class="chart-body">
+                                <canvas #expenseByTypeChart id="expenseByTypeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="missions-summary">
+                            <h3 class="section-title">Missions Summary</h3>
+                            <div class="summary-grid">
+                                <div class="summary-card">
+                                    <div class="summary-value">{{ missionStatusCount('Active') || 0 }}</div>
+                                    <div class="summary-label">
+                                        <mat-icon>play_circle</mat-icon> Active
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-value">{{ missionStatusCount('Pending') || 0 }}</div>
+                                    <div class="summary-label">
+                                        <mat-icon>pending</mat-icon> Pending
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-value">{{ missionStatusCount('Completed') || 0 }}</div>
+                                    <div class="summary-label">
+                                        <mat-icon>check_circle</mat-icon> Completed
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-value">{{ missionStatusCount('Cancelled') || 0 }}</div>
+                                    <div class="summary-label">
+                                        <mat-icon>cancel</mat-icon> Cancelled
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mission-cta">
+                                <button class="btn btn-primary" routerLink="/missions">
+                                    <mat-icon>list</mat-icon> View All Missions
+                                </button>
+                                <button *ngIf="navigationService.canAccess([Role.Admin, Role.Manager])" class="btn btn-secondary" routerLink="/missions/create">
+                                    <mat-icon>add_circle</mat-icon> Create Mission
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Associers -->
+                <div class="tab-pane" [class.active]="selectedTab === 2">
+                    <div class="tab-grid">
+                        <div class="chart-container" *ngIf="associerAvaData">
+                            <h3 class="section-title">AVA by Partner</h3>
+                            <div class="chart-body">
+                                <canvas #associerAvaChart id="associerAvaChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" *ngIf="topAssociersData">
+                            <h3 class="section-title">Top Partners by Expense</h3>
+                            <div class="chart-body">
+                                <canvas #topAssociersChart id="topPartnersChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="associer-table-container">
+                            <h3 class="section-title">Partner Budget Allocation</h3>
+                            <div class="table-actions">
+                                <div class="table-search">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search pertners..." 
+                                        (keyup)="applyFilter($event)"
+                                        class="search-input">
+                                    <mat-icon class="search-icon">search</mat-icon>
+                                </div>
+                                <button class="btn btn-sm btn-outline" (click)="exportDashboardData('excel')">
+                                    <mat-icon>download</mat-icon> Export
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="dataSource" matSort class="budget-table">
+                                    <ng-container matColumnDef="name">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Partner</th>
+                                        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="allocated">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Allocated</th>
+                                        <td mat-cell *matCellDef="let element">{{ formatCompactCurrency(element.allocated) }}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="used">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Used</th>
+                                        <td mat-cell *matCellDef="let element">{{ formatCompactCurrency(element.used) }}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="remaining">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Remaining</th>
+                                        <td mat-cell *matCellDef="let element">{{ formatCompactCurrency(element.remaining) }}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="percentage">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Utilization</th>
+                                        <td mat-cell *matCellDef="let element">
+                                            <div class="utilization-bar">
+                                                <div class="utilization-progress" 
+                                                    [style.width.%]="element.percentage"
+                                                    [ngClass]="{
+                                                        'high': element.percentage >= 90,
+                                                        'medium': element.percentage >= 70 && element.percentage < 90,
+                                                        'low': element.percentage < 70
+                                                    }">
+                                                </div>
+                                                <span>{{ element.percentage }}%</span>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+                                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                                </table>
+                            </div>
+                            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: History -->
+                <div class="tab-pane" [class.active]="selectedTab === 3">
+                    <div class="tab-grid">
+                        <!-- Budget Allocation History -->
+                        <div class="allocation-history" *ngIf="budgetAllocationHistory.length > 0">
+                            <h3 class="section-title">Budget Allocation History</h3>
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Recipient</th>
+                                        <th>Amount</th>
+                                        <th>Allocated By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of budgetAllocationHistory">
+                                        <td>{{ item.date | date:'mediumDate' }}</td>
+                                        <td>
+                                            <span class="allocation-type" [ngClass]="item.allocationType">
+                                                <mat-icon *ngIf="item.allocationType === 'mission'">work</mat-icon>
+                                                <mat-icon *ngIf="item.allocationType === 'associer'">person</mat-icon>
+                                                {{ item.allocationType }}
+                                            </span>
+                                        </td>
+                                        <td>{{ item.targetName }}</td>
+                                        <td class="amount positive">{{ formatCompactCurrency(item.amount) }}</td>
+                                        <td>{{ item.allocatedBy }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="pagination">
+                                <div class="page-item"><mat-icon>first_page</mat-icon></div>
+                                <div class="page-item"><mat-icon>navigate_before</mat-icon></div>
+                                <div class="page-item active">1</div>
+                                <div class="page-item">2</div>
+                                <div class="page-item">3</div>
+                                <div class="page-item"><mat-icon>navigate_next</mat-icon></div>
+                                <div class="page-item"><mat-icon>last_page</mat-icon></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               <!-- Tab 5: Currency (New Tab) -->
+                <div class="tab-pane" [class.active]="selectedTab === 4">
+                    <div class="tab-grid">
+                        <!-- Currency Converter Widget -->
+                        <div class="currency-widget">
+                            <app-currency-converter></app-currency-converter>
+                        </div>
+                        
+                        <div class="chart-container" *ngIf="currencies && currencies.length > 0">
+                            <h3 class="section-title">Currency History</h3>
+                            <div class="chart-body">
+                                <canvas #currencyHistoryChart id="currencyHistoryChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="currency-info-container">
+                            <h3 class="section-title">Currency Information</h3>
+                            <p class="currency-info-text">
+                                Track real-time exchange rates and convert between currencies. 
+                                Currency rates are updated automatically every minute to ensure you 
+                                have the most current information for your financial decisions.
+                            </p>
+                            <div class="currency-tips">
+                                <div class="tip-item">
+                                    <mat-icon class="tip-icon">info</mat-icon>
+                                    <div class="tip-content">
+                                        <h4>Why Track Currencies?</h4>
+                                        <p>Monitoring exchange rate fluctuations helps optimize the timing of international transactions and improves budget forecasting.</p>
+                                    </div>
+                                </div>
+                                <div class="tip-item">
+                                    <mat-icon class="tip-icon">lightbulb</mat-icon>
+                                    <div class="tip-content">
+                                        <h4>Currency Strategy</h4>
+                                        <p>Consider setting up currency hedging strategies when planning international missions to minimize exchange rate risk.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Allocation Modal -->
+<div class="modal" [class.active]="showAllocationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Allocate Budget</h3>
+            <button class="close-btn" (click)="closeAllocationModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form [formGroup]="allocationForm">
+                <div class="form-group">
+                    <label for="allocationType">Allocation Type</label>
+                    <select id="allocationType" formControlName="allocationType" class="form-control">
+                        <option value="associer">Allocate to Partner</option>
+                        <option value="mission">Allocate to Mission</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" *ngIf="allocationForm.get('allocationType')?.value === 'associer'">
+                    <label for="associerId">Partner</label>
+                    <select id="associerId" formControlName="associerId" class="form-control">
+                        <option value="">Select Partner</option>
+                        <option *ngFor="let associer of associers" [value]="associer.id">
+                            {{ associer.name }}
+                        </option>
+                    </select>
+                    <div *ngIf="allocationForm.get('associerId')?.invalid && 
+                               (allocationForm.get('associerId')?.dirty || 
+                                allocationForm.get('associerId')?.touched)" 
+                         class="text-danger">
+                        <mat-icon class="error-icon">error</mat-icon> Please select a partner
+                    </div>
+                </div>
+                
+                <div class="form-group" *ngIf="allocationForm.get('allocationType')?.value === 'mission'">
+                    <label for="missionId">Mission</label>
+                    <select id="missionId" formControlName="missionId" class="form-control">
+                        <option value="">Select Mission</option>
+                        <option *ngFor="let mission of missions" [value]="mission.id">
+                            {{ mission.nomDeContract }}
+                        </option>
+                    </select>
+                    <div *ngIf="allocationForm.get('missionId')?.invalid && 
+                               (allocationForm.get('missionId')?.dirty || 
+                                allocationForm.get('missionId')?.touched)" 
+                         class="text-danger">
+                        <mat-icon class="error-icon">error</mat-icon> Please select a mission
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Amount (TND)</label>
+                    <input type="number" id="amount" formControlName="amount" min="0" class="form-control">
+                    <div *ngIf="allocationForm.get('amount')?.invalid && 
+                               (allocationForm.get('amount')?.dirty || 
+                                allocationForm.get('amount')?.touched)" 
+                         class="text-danger">
+                        <mat-icon class="error-icon">error</mat-icon> Please enter a valid amount greater than 0
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" formControlName="notes" rows="3" class="form-control"
+                              placeholder="Enter any additional information about this allocation"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeAllocationModal()">
+                <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button class="btn btn-primary" 
+                    [disabled]="allocationForm.invalid" 
+                    (click)="submitAllocation()">
+                <mat-icon>check</mat-icon> Allocate Budget
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Modal -->
+<div class="modal" [class.active]="showAlertsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Budget Alerts</h3>
+            <button class="close-btn" (click)="closeAlertsModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alerts-list">
+                <div *ngFor="let alert of budgetAlerts" 
+                     class="alert-item" 
+                     [ngClass]="alert.type">
+                    <mat-icon class="alert-icon" [ngClass]="alert.type">
+                        {{ getAlertIcon(alert.type) }}
+                    </mat-icon>
+                    <span>{{ alert.message }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="closeAlertsModal()">
+                <mat-icon>check</mat-icon> Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button - only visible for admins who can allocate budget -->
+<button *ngIf="navigationService.canAllocateBudget()" class="floating-action-btn" (click)="openAllocationModal()">
+    <mat-icon>add</mat-icon>
+</button>

@@ -1,0 +1,293 @@
+<div class="expense-list-container dark-mode">
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <h1>Expense Tracker</h1>
+      <p>Financial management and expense analytics</p>
+    </div>
+  </div>
+
+  <!-- Header section -->
+  <div class="header-section d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 *ngIf="!mission">Expenses</h1>
+      <h1 *ngIf="mission">Expenses for Mission: {{ mission.nomDeContract }}</h1>
+      <p *ngIf="mission" class="text-muted">
+        <mat-icon class="header-icon">assignment</mat-icon> Mission ID: {{ mission.idMission }} 
+        <mat-icon class="header-icon ml-2">business</mat-icon> Client: {{ mission.client }}
+      </p>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch($event)"
+          placeholder="Search expenses..."
+          class="form-control"
+        />
+        <button *ngIf="searchTerm" class="clear-search" (click)="searchTerm=''; onSearch({target:{value:''}})">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+      <button class="btn btn-filter" (click)="toggleFilters()">
+        <mat-icon>filter_list</mat-icon>
+        <span>Filters</span>
+        <span class="filter-badge" *ngIf="hasActiveFilters()">
+          <mat-icon class="filter-active">circle</mat-icon>
+        </span>
+      </button>
+    </div>
+    <div class="button-container">
+      <div class="dropdown">
+        <button class="btn btn-create dropdown-toggle" type="button" id="addExpenseDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <mat-icon>add</mat-icon>
+          <span>Add New</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="addExpenseDropdown">
+          <li>
+            <a 
+              class="dropdown-item" 
+              [routerLink]="missionId ? ['/missions', missionId, 'expenses', 'create'] : ['/expenses/create']"
+            >
+              <mat-icon>edit</mat-icon> Create Manually
+            </a>
+          </li>
+          <li>
+            <a 
+              class="dropdown-item" 
+              [routerLink]="missionId ? ['/missions', missionId, 'expenses', 'create-from-document'] : ['/expenses/create-from-document']"
+            >
+              <mat-icon>upload_file</mat-icon> Upload Document
+            </a>
+          </li>
+        </ul>
+      </div>
+      <button class="btn btn-excel" (click)="downloadExcel()" title="Export to Excel">
+        <mat-icon>table_chart</mat-icon>
+        <span>Excel</span>
+      </button>
+      <button class="btn btn-pdf" (click)="downloadPDF()" title="Export to PDF">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF</span>
+      </button>
+      <button 
+        *ngIf="missionId" 
+        [routerLink]="['/missions', missionId]" 
+        class="btn btn-secondary"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        <span>Back</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced Filters Panel -->
+  <div class="advanced-filters" [ngClass]="{'show-filters': showFilters}">
+    <h4><mat-icon>tune</mat-icon> Advanced Filters</h4>
+    <form [formGroup]="filterForm" class="filter-form">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">flag</mat-icon> Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="">All Statuses</option>
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">category</mat-icon> Category</label>
+          <select formControlName="category" class="form-control">
+            <option value="">All Categories</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">currency_exchange</mat-icon> Currency</label>
+          <select formControlName="currency" class="form-control">
+            <option value="">All Currencies</option>
+            <option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">date_range</mat-icon> Date Range</label>
+          <div class="date-range">
+            <input type="date" formControlName="dateFrom" class="form-control" placeholder="From">
+            <span class="date-separator">to</span>
+            <input type="date" formControlName="dateTo" class="form-control" placeholder="To">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">attach_money</mat-icon> Amount Range (TND)</label>
+          <div class="amount-range">
+            <input type="number" formControlName="amountMin" class="form-control" placeholder="Min">
+            <span class="amount-separator">to</span>
+            <input type="number" formControlName="amountMax" class="form-control" placeholder="Max">
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn btn-reset" (click)="resetFilters()">
+            <mat-icon>settings_backup_restore</mat-icon> Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results info bar -->
+  <div class="results-info" *ngIf="!loading && filteredExpenses.length > 0">
+    <mat-icon class="info-icon">info</mat-icon>
+    <span class="results-count">{{ filteredExpenses.length }} expenses</span>
+    <span class="results-total" *ngIf="filteredExpenses.length !== expenses.length">
+      of {{ expenses.length }} total
+    </span>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger">
+    <mat-icon class="alert-icon">error</mat-icon>
+    {{ error }}
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="loading-indicator">
+    <mat-icon class="loading-icon">sync</mat-icon>
+    <p>Loading expenses...</p>
+  </div>
+
+  <!-- No expenses found -->
+  <div *ngIf="!loading && expenses.length === 0" class="no-expenses">
+    <mat-icon class="empty-icon">receipt_long</mat-icon>
+    <p>No expenses found.</p>
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="emptyAddExpenseDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Add New Expense
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="emptyAddExpenseDropdown">
+        <li>
+          <a 
+            class="dropdown-item" 
+            [routerLink]="missionId ? ['/missions', missionId, 'expenses', 'create'] : ['/expenses/create']"
+          >
+            <mat-icon>edit</mat-icon> Create Manually
+          </a>
+        </li>
+        <li>
+          <a 
+            class="dropdown-item" 
+            [routerLink]="missionId ? ['/missions', missionId, 'expenses', 'create-from-document'] : ['/expenses/create-from-document']"
+          >
+            <mat-icon>upload_file</mat-icon> Upload Document
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- No results after filtering -->
+  <div *ngIf="!loading && expenses.length > 0 && filteredExpenses.length === 0" class="no-expenses">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <p>No expenses match the selected filters.</p>
+    <button class="btn btn-reset" (click)="resetFilters()">
+      <mat-icon>settings_backup_restore</mat-icon> Reset Filters
+    </button>
+  </div>
+
+  <!-- Expenses table -->
+  <div *ngIf="!loading && filteredExpenses.length > 0" class="expenses-table-container">
+    <div class="table-responsive">
+      <table class="table expenses-table">
+        <thead>
+          <tr>
+            <th (click)="sort('id')" class="sortable">
+              ID <mat-icon class="sort-icon">{{ getSortIconMaterial('id') }}</mat-icon>
+            </th>
+            <th *ngIf="!missionId" (click)="sort('missionName')" class="sortable">
+              Mission <mat-icon class="sort-icon">{{ getSortIconMaterial('missionName') }}</mat-icon>
+            </th>
+            <th (click)="sort('expenseDate')" class="sortable">
+              Date <mat-icon class="sort-icon">{{ getSortIconMaterial('expenseDate') }}</mat-icon>
+            </th>
+            <th (click)="sort('description')" class="sortable">
+              Description <mat-icon class="sort-icon">{{ getSortIconMaterial('description') }}</mat-icon>
+            </th>
+            <th (click)="sort('category')" class="sortable">
+              Category <mat-icon class="sort-icon">{{ getSortIconMaterial('category') }}</mat-icon>
+            </th>
+            <th (click)="sort('amount')" class="sortable text-end">
+              Amount <mat-icon class="sort-icon">{{ getSortIconMaterial('amount') }}</mat-icon>
+            </th>
+            <th (click)="sort('currency')" class="sortable">
+              Currency <mat-icon class="sort-icon">{{ getSortIconMaterial('currency') }}</mat-icon>
+            </th>
+            <th (click)="sort('convertedAmount')" class="sortable text-end">
+              Converted (TND) <mat-icon class="sort-icon">{{ getSortIconMaterial('convertedAmount') }}</mat-icon>
+            </th>
+            <th (click)="sort('status')" class="sortable">
+              Status <mat-icon class="sort-icon">{{ getSortIconMaterial('status') }}</mat-icon>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let expense of filteredExpenses; let even = even" [ngClass]="{'even-row': even}">
+            <td>{{ expense.id }}</td>
+            <td *ngIf="!missionId">
+              <a [routerLink]="['/missions', expense.missionId]">{{ expense.missionName }}</a>
+            </td>
+            <td>{{ formatDate(expense.expenseDate) }}</td>
+            <td>{{ expense.description }}</td>
+            <td>
+              <div class="category-cell">
+                <mat-icon [ngClass]="getCategoryIcon(expense.category)">{{ getCategoryIcon(expense.category) }}</mat-icon>
+                {{ expense.category }}
+              </div>
+            </td>
+            <td class="text-end">{{ expense.amount | number:'1.2-2' }}</td>
+            <td>{{ expense.currency }}</td>
+            <td class="text-end">{{ expense.convertedAmount | number:'1.2-2' }}</td>
+            <td>
+              <span [ngClass]="statusBadgeClass(expense.status)">
+                <mat-icon class="status-icon">{{ getStatusIcon(expense.status) }}</mat-icon>
+                {{ expense.status }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <a 
+                [routerLink]="['/expenses', expense.id, 'edit']" 
+                class="btn-action btn-edit" 
+                title="Edit"
+              >
+                <mat-icon>edit</mat-icon>
+              </a>
+              <button 
+                (click)="deleteExpense(expense.id)" 
+                class="btn-action btn-delete" 
+                title="Delete"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="table-footer">
+            <td [attr.colspan]="missionId ? '5' : '6'" class="total-label">
+              <mat-icon class="total-icon">summarize</mat-icon> Total
+            </td>
+            <td></td>
+            <td></td>
+            <td class="text-end">{{ totalAmount | number:'1.2-2' }}</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

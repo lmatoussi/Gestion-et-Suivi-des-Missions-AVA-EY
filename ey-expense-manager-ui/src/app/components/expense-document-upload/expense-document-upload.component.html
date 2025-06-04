@@ -1,0 +1,199 @@
+<div class="expense-document-upload-container dark-mode">
+    <div class="page-header">
+      <h1 *ngIf="!mission">Create Expense from Document</h1>
+      <h1 *ngIf="mission">Create Expense for Mission: {{ mission.nomDeContract }}</h1>
+      <p *ngIf="mission" class="text-muted">
+        Mission ID: {{ mission.idMission }} | Client: {{ mission.client }}
+      </p>
+    </div>
+  
+    <div class="card">
+      <div class="card-header">
+        <h2>Upload Document</h2>
+      </div>
+      <div class="card-body">
+        <!-- Error and Success Messages -->
+        <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+        <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+  
+        <!-- Document Upload Section -->
+        <div class="upload-section">
+          <p class="info-text">
+            <i class="fas fa-info-circle"></i>
+            Upload a CSV file containing mission data to automatically fill in expense details.
+          </p>
+          
+          <form [formGroup]="uploadForm" class="upload-form">
+            <div class="form-group">
+              <label for="file">Select Document</label>
+              <div class="file-input-wrapper">
+                <input 
+                  type="file" 
+                  id="file" 
+                  (change)="onFileSelected($event)" 
+                  accept=".csv,.xlsx,.xls"
+                  [disabled]="loading"
+                >
+                <span class="file-input-info">Supported formats: CSV, Excel</span>
+              </div>
+            </div>
+            
+            <button 
+              type="button" 
+              class="btn btn-primary upload-btn" 
+              (click)="uploadDocument()" 
+              [disabled]="!selectedFile || loading"
+            >
+              <i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-upload'"></i>
+              {{ loading ? 'Processing...' : 'Process Document' }}
+            </button>
+          </form>
+        </div>
+  
+        <!-- Mission Details Section (shown after document is processed) -->
+        <div *ngIf="documentData" class="mission-details">
+          <h3>Mission Details</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Mission ID:</span>
+              <span class="detail-value">{{ documentData.missionIdString }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Mission Name:</span>
+              <span class="detail-value">{{ documentData.missionName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Client:</span>
+              <span class="detail-value">{{ documentData.client }}</span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Expense Form (shown after document is processed) -->
+        <div *ngIf="documentData" class="expense-form-section">
+          <h3>Expense Details</h3>
+          <p class="form-hint">Review and edit the expense details extracted from the document.</p>
+          
+          <form [formGroup]="expenseForm" (ngSubmit)="createExpense()" class="expense-form">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="description">Description</label>
+                <input 
+                  type="text" 
+                  id="description" 
+                  formControlName="description" 
+                  class="form-control"
+                  [ngClass]="{'is-invalid': expenseForm.get('description')?.invalid && expenseForm.get('description')?.touched}"
+                >
+                <div class="invalid-feedback">Description is required</div>
+              </div>
+              
+              <div class="form-group col-md-3">
+                <label for="amount">Amount</label>
+                <input 
+                  type="number" 
+                  id="amount" 
+                  formControlName="amount" 
+                  class="form-control" 
+                  step="0.01"
+                  [ngClass]="{'is-invalid': expenseForm.get('amount')?.invalid && expenseForm.get('amount')?.touched}"
+                >
+                <div class="invalid-feedback">Valid amount is required</div>
+              </div>
+              
+              <div class="form-group col-md-3">
+                <label for="currency">Currency</label>
+                <input 
+                  type="text" 
+                  id="currency" 
+                  formControlName="currency" 
+                  class="form-control"
+                  [ngClass]="{'is-invalid': expenseForm.get('currency')?.invalid && expenseForm.get('currency')?.touched}"
+                >
+                <div class="invalid-feedback">Currency is required</div>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="convertedAmount">Converted Amount (TND)</label>
+                <input 
+                  type="number" 
+                  id="convertedAmount" 
+                  formControlName="convertedAmount" 
+                  class="form-control"
+                  step="0.01"
+                >
+              </div>
+  
+              <div class="form-group col-md-4">
+                <label for="category">Category</label>
+                <input 
+                  type="text" 
+                  id="category" 
+                  formControlName="category" 
+                  class="form-control"
+                >
+              </div>
+              
+              <div class="form-group col-md-4">
+                <label for="expenseDate">Expense Date</label>
+                <input 
+                  type="date" 
+                  id="expenseDate" 
+                  formControlName="expenseDate" 
+                  class="form-control"
+                  [ngClass]="{'is-invalid': expenseForm.get('expenseDate')?.invalid && expenseForm.get('expenseDate')?.touched}"
+                >
+                <div class="invalid-feedback">Date is required</div>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="receiptUrl">Receipt URL</label>
+                <input 
+                  type="text" 
+                  id="receiptUrl" 
+                  formControlName="receiptUrl" 
+                  class="form-control"
+                >
+              </div>
+              
+              <div class="form-group col-md-6">
+                <label for="status">Status</label>
+                <select 
+                  id="status" 
+                  formControlName="status" 
+                  class="form-control"
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Submitted">Submitted</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                [routerLink]="missionId ? ['/missions', missionId, 'expenses'] : ['/expenses']"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-success" 
+                [disabled]="expenseForm.invalid || submitting"
+              >
+                <i class="fas" [ngClass]="submitting ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+                {{ submitting ? 'Creating...' : 'Create Expense' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

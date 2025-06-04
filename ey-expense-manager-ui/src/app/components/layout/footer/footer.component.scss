@@ -1,0 +1,117 @@
+// Colors matching your dark theme application
+$bg-dark: #1a1b2e;
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.5);
+$border-color: rgba(255, 255, 255, 0.05);
+$accent-blue: #4354ff;
+$accent-purple: #7a5cff;
+
+.ey-footer {
+  background-color: $bg-dark;
+  padding: 1rem 0;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  border-top: 1px solid $border-color;
+  margin-top: auto;
+  position: relative;
+  z-index: 10;
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .footer-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+    
+    a {
+      color: $text-primary;
+      text-decoration: none;
+      padding: 0.5rem 0.8rem;
+      transition: color 0.3s ease;
+      font-size: 0.85rem;
+      font-weight: 500;
+      position: relative;
+      
+      &:hover {
+        color: $accent-purple;
+      }
+      
+      &:not(:last-child)::after {
+        content: '|';
+        position: absolute;
+        right: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-secondary;
+        font-weight: 300;
+        opacity: 0.5;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      a {
+        padding: 0.4rem 0;
+        
+        &:not(:last-child)::after {
+          display: none;
+        }
+      }
+    }
+  }
+  
+  .footer-disclaimer {
+    text-align: center;
+    margin-bottom: 0.7rem;
+    padding: 0 1.5rem;
+    
+    p {
+      line-height: 1.5;
+      font-size: 0.75rem;
+      color: $text-secondary;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  }
+  
+  .footer-copyright {
+    text-align: center;
+    
+    p {
+      font-size: 0.7rem;
+      color: $text-secondary;
+      margin: 0;
+      padding-bottom: 0.5rem;
+    }
+  }
+  
+  // Position at the bottom when content is small
+  @media (min-height: 100vh) {
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+// Specific styles for the app context
+:host {
+  display: block;
+  
+  // When inside a form-based layout
+  .main-container & {
+    position: relative;
+    width: 100%;
+    margin-top: 2rem;
+  }
+  
+  // Add slight margin when used in expense or mission create pages
+  app-expense-create &,
+  app-mission-create & {
+    margin-top: 3rem;
+  }
+}

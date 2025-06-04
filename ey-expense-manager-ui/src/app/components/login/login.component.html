@@ -1,0 +1,80 @@
+<div class="auth-container">
+  <div class="auth-background">
+    <img src="assets/ey-reframe-your-future-digital-city-static.jpg" alt="EY Background" class="background-image">
+  </div>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo-container">
+        <img src="assets/eylogo.png" alt="EY Logo" class="logo">
+      </div>
+      <h1 class="auth-title">Sign In</h1>
+      <p class="auth-subtitle">Sign in to your EY Expense Manager account</p>
+    </div>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email <span class="required">*</span></label>
+        <div class="input-container">
+          <div class="input-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="Enter your email"
+            [ngClass]="{'input-error': submitted && f['email'].errors}"
+          >
+        </div>
+        <div class="error-message" *ngIf="submitted && f['email'].errors">
+          <div *ngIf="f['email'].errors['required']">Email is required</div>
+          <div *ngIf="f['email'].errors['email']">Please enter a valid email address</div>
+        </div>
+      </div>
+      
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password <span class="required">*</span></label>
+        <div class="input-container">
+          <div class="input-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <input 
+            [type]="passwordVisibility ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password" 
+            placeholder="Enter your password"
+            [ngClass]="{'input-error': submitted && f['password'].errors}"
+          >
+          <div class="input-icon-right" (click)="togglePasswordVisibility()">
+            <i class="fas" [ngClass]="passwordVisibility ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </div>
+        </div>
+        <div class="error-message" *ngIf="submitted && f['password'].errors">
+          <div *ngIf="f['password'].errors['required']">Password is required</div>
+          <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+        </div>
+        <div class="forgot-password">
+          <a routerLink="/forgot-password" class="auth-link">Forgot Password?</a>
+        </div>
+      </div>
+      
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+      
+      <button type="submit" class="auth-button" [disabled]="loading">
+        <span *ngIf="loading">
+          <i class="fas fa-circle-notch fa-spin"></i> Signing In...
+        </span>
+        <span *ngIf="!loading">Sign In</span>
+      </button>
+      
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/register" class="auth-link">Create Account</a></p>
+      </div>
+    </form>
+  </div>
+</div>

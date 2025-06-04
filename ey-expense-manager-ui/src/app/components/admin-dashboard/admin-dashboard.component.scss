@@ -1,0 +1,94 @@
+// admin-dashboard.component.scss
+// This file now just imports all the modular SCSS files
+
+// Core styles (these should be imported first)
+@import './styles/variables';
+@import './styles/mixins';
+@import './styles/animations';
+
+// Layout and components
+@import './styles/layout';
+@import './styles/cards';
+@import './styles/tables';
+@import './styles/charts';
+@import './styles/forms';
+@import './styles/modals';
+@import './styles/utilities';
+
+// Always import responsive styles last
+@import './styles/responsive';
+
+.partner-access-card {
+  background-color: var(--card-bg, white);
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover, 0 4px 12px rgba(0, 0, 0, 0.15));
+  }
+  
+  .card-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    display: flex;
+    align-items: center;
+    
+    h3 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 500;
+      
+      mat-icon {
+        margin-right: 0.5rem;
+        color: var(--primary-color, #3f51b5);
+      }
+    }
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .partner-selector-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    
+    mat-form-field {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    button {
+      white-space: nowrap;
+    }
+  }
+  
+  .partner-action-hint {
+    color: var(--text-secondary, #666);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Dark mode adjustments */
+:host-context(.dark-mode) {
+  .partner-access-card {
+    background-color: var(--dark-card-bg, #1e1e1e);
+    
+    .card-header {
+      border-bottom-color: var(--dark-border-color, #444);
+    }
+    
+    .partner-action-hint {
+      color: var(--dark-text-secondary, #aaa);
+    }
+  }
+}

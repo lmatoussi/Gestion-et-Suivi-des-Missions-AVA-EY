@@ -1,0 +1,48 @@
+<div class="auth-container">
+  <div class="auth-background">
+    <img src="assets/ey-reframe-your-future-digital-city-static.jpg" alt="EY Background" class="background-image">
+  </div>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo-container">
+        <img src="assets/eylogo.png" alt="EY Logo" class="logo">
+      </div>
+      <h1 class="auth-title">User Verification</h1>
+    </div>
+    
+    <div class="auth-content">
+      <div *ngIf="loading" class="loading-container">
+        <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+        <p>Processing verification...</p>
+      </div>
+      
+      <div *ngIf="!loading && success" class="success-message">
+        <i class="fas fa-check-circle fa-3x"></i>
+        <h2>User Verified Successfully</h2>
+        <p>The user has been verified and will receive an email with further instructions.</p>
+        <button routerLink="/login" class="auth-button">Return to Login</button>
+      </div>
+      
+      <div *ngIf="!loading && error" class="error-message">
+        <i class="fas fa-exclamation-circle fa-3x"></i>
+        <h2>Verification Failed</h2>
+        <p>{{ error }}</p>
+        <button routerLink="/login" class="auth-button">Return to Login</button>
+      </div>
+      
+      <div *ngIf="!loading && !success && !error" class="verification-actions">
+        <h2>User Account Verification</h2>
+        <p>Please review and approve or reject this user account:</p>
+        <div class="action-buttons">
+          <button (click)="verifyUser()" class="auth-button approve">
+            <i class="fas fa-check"></i> Approve User
+          </button>
+          <button (click)="rejectUser()" class="auth-button reject">
+            <i class="fas fa-times"></i> Reject User
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

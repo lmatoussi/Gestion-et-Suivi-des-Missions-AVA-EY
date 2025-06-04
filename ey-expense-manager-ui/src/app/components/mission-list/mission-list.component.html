@@ -1,0 +1,174 @@
+<div class="mission-list-container dark-mode">
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <h1>Stellar Missions</h1>
+      <p>Financial overview and performance analytics</p>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch($event)"
+          placeholder="Search missions..."
+          class="form-control"
+        />
+        <button *ngIf="searchTerm" class="clear-search" (click)="searchTerm=''; onSearch({target:{value:''}})">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+      <button class="btn btn-filter" (click)="toggleFilters()">
+        <mat-icon>filter_list</mat-icon>
+        <span>Filters</span>
+        <span class="filter-badge" *ngIf="hasActiveFilters()">
+          <mat-icon class="filter-active">circle</mat-icon>
+        </span>
+      </button>
+    </div>
+    <div class="button-container">
+      <button [routerLink]="['/missions/create']" class="btn btn-create">
+        <mat-icon>add</mat-icon>
+        <span>Create New</span>
+      </button>
+      
+      <button class="btn btn-excel" (click)="downloadExcel()" title="Export to Excel">
+        <mat-icon>table_chart</mat-icon>
+        <span>Excel</span>
+      </button>
+      <button class="btn btn-pdf" (click)="downloadPDF()" title="Export to PDF">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced Filters Panel -->
+  <div class="advanced-filters" [ngClass]="{'show-filters': showFilters}">
+    <h4><mat-icon>tune</mat-icon> Advanced Filters</h4>
+    <form [formGroup]="filterForm" class="filter-form">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">flag</mat-icon> Status</label>
+          <select formControlName="status" class="form-control">
+            <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">date_range</mat-icon> Date Range</label>
+          <div class="date-range">
+            <input type="date" formControlName="dateFrom" class="form-control" placeholder="From">
+            <span class="date-separator">to</span>
+            <input type="date" formControlName="dateTo" class="form-control" placeholder="To">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label><mat-icon class="filter-icon">attach_money</mat-icon> Amount Range (TND)</label>
+          <div class="amount-range">
+            <input type="number" formControlName="amountMin" class="form-control" placeholder="Min">
+            <span class="amount-separator">to</span>
+            <input type="number" formControlName="amountMax" class="form-control" placeholder="Max">
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn btn-reset" (click)="resetFilters()">
+            <mat-icon>settings_backup_restore</mat-icon> Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results info bar -->
+  <div class="results-info" *ngIf="!loading && filteredMissions.length > 0">
+    <mat-icon class="info-icon">info</mat-icon>
+    <span class="results-count">{{ filteredMissions.length }} missions</span>
+    <span class="results-total" *ngIf="filteredMissions.length !== missions.length">
+      of {{ missions.length }} total
+    </span>
+  </div>
+
+  <div *ngIf="loading" class="loading-indicator">
+    <mat-icon class="loading-icon">sync</mat-icon> Loading missions...
+  </div>
+  
+  <div *ngIf="error" class="alert alert-danger">
+    <mat-icon class="alert-icon">error</mat-icon> {{ error }}
+  </div>
+  
+  <div *ngIf="!loading && !error && filteredMissions.length === 0" class="no-missions">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <p>No missions found matching your criteria.</p>
+    <button class="btn btn-reset" (click)="resetFilters()">
+      <mat-icon>settings_backup_restore</mat-icon> Reset Filters
+    </button>
+  </div>
+
+  <div *ngIf="!loading && filteredMissions.length > 0" class="missions-table-container">
+    <div class="table-responsive">
+      <table class="table missions-table">
+        <thead>
+          <tr>
+            <th (click)="sort('idMission')" class="sortable">
+              ID <mat-icon class="sort-icon">{{ getSortIconMaterial('idMission') }}</mat-icon>
+            </th>
+            <th (click)="sort('nomDeContract')" class="sortable">
+              Contract <mat-icon class="sort-icon">{{ getSortIconMaterial('nomDeContract') }}</mat-icon>
+            </th>
+            <th (click)="sort('client')" class="sortable">
+              Client <mat-icon class="sort-icon">{{ getSortIconMaterial('client') }}</mat-icon>
+            </th>
+            <th (click)="sort('dateSignature')" class="sortable">
+              Date <mat-icon class="sort-icon">{{ getSortIconMaterial('dateSignature') }}</mat-icon>
+            </th>
+            <th (click)="sort('status')" class="sortable">
+              Status <mat-icon class="sort-icon">{{ getSortIconMaterial('status') }}</mat-icon>
+            </th>
+            <th (click)="sort('montantTnd')" class="sortable">
+              Amount (TND) <mat-icon class="sort-icon">{{ getSortIconMaterial('montantTnd') }}</mat-icon>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let mission of filteredMissions; let even = even" [ngClass]="{'even-row': even}">
+            <td>{{ mission.idMission }}</td>
+            <td>{{ mission.nomDeContract }}</td>
+            <td>
+              <div class="client-cell">
+                <mat-icon class="client-icon">business</mat-icon>
+                {{ mission.client }}
+              </div>
+            </td>
+            <td>{{ mission.dateSignature | date:'mediumDate' }}</td>
+            <td>
+              <span [ngClass]="statusBadgeClass(mission.status)">
+                <mat-icon class="status-icon">{{ getStatusIcon(mission.status) }}</mat-icon>
+                {{ mission.status }}
+              </span>
+            </td>
+            <td>{{ mission.montantTnd | currency:'TND':'symbol' }}</td>
+            <td class="actions-cell">
+              <a [routerLink]="['/missions', mission.id]" class="btn-action btn-view" title="View">
+                <mat-icon>visibility</mat-icon>
+              </a>
+              <a [routerLink]="['/missions/edit', mission.id]" class="btn-action btn-edit" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </a>
+              <button (click)="deleteMission(mission.id)" class="btn-action btn-delete" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+              <button (click)="downloadExpenseTemplate(mission, $event)" class="btn-action btn-download" title="Download Template">
+                <mat-icon>download</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

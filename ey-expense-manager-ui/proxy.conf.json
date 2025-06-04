@@ -1,0 +1,11 @@
+{
+  "/api/exchange-rates": {
+    "target": "https://api.exchangerate-api.com/v4/latest/TND",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api/exchange-rates": ""
+    }
+  }
+}

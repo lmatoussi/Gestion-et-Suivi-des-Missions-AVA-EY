@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Backend API
+  eyexpensemanager-api:
+    image: eyexpensemanager-api:latest
+    container_name: eyexpensemanager-api
+    restart: unless-stopped
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EYExpenseDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+      - redis
+    networks:
+      - app-network
+
+  # Frontend UI
+  eyexpensemanager-ui:
+    image: eyexpensemanager-ui:latest
+    container_name: eyexpensemanager-ui
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - eyexpensemanager-api
+    networks:
+      - app-network
+
+  # SQL Server (reusing from devops-compose.yml)
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: unless-stopped
+    ports:
+      - "11433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_PID=Developer
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - app-network
+
+  # Redis (reusing from devops-compose.yml)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+volumes:
+  sqlserver_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

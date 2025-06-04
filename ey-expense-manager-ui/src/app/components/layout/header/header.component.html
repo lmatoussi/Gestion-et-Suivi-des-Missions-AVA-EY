@@ -1,0 +1,42 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <span>
+    <a routerLink="/admin/dashboard" style="display:inline-block;">
+      <img src="assets/eylogo.png" alt="EY Logo" height="40" style="cursor:pointer;">
+    </a>
+  </span>
+
+  <span class="spacer"></span>
+
+  <nav>
+    <a routerLink="/missions" mat-button>Contracts</a>
+    <a routerLink="/expenses" mat-button>Expenses</a>
+    <a mat-button>Industries</a>
+    <a mat-button>Careers</a>
+    <a mat-button>About us</a>
+    <a mat-button>Search</a>
+    <a mat-button>My EY</a>
+    <a mat-button>Global English</a>
+  </nav>
+
+  <!-- User Profile Image and Menu -->
+  <div class="user-actions">
+    <button mat-raised-button class="logout-button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+    
+    <div class="user-profile" [matMenuTriggerFor]="menu" tabindex="0" role="button" aria-label="User menu">
+      <img [src]="profileImageUrl" alt="User Profile Image" class="profile-image" (error)="handleImageError()" />
+    </div>
+  </div>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item disabled>
+      <strong>{{ user?.nameUser }} {{ user?.surname }}</strong>
+    </button>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
+  </mat-menu>
+</mat-toolbar>

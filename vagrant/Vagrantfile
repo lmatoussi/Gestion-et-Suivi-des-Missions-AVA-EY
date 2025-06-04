@@ -1,0 +1,47 @@
+# Vagrantfile
+Vagrant.configure("2") do |config|
+  # Use Ubuntu 22.04 LTS
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.box_version = "20231215.0.0"
+  
+  # VM Configuration
+  config.vm.hostname = "devops-vm"
+  
+  # Network Configuration
+  config.vm.network "private_network", ip: "192.168.56.10"
+  
+  # Port Forwarding for DevOps Tools
+  config.vm.network "forwarded_port", guest: 8080, host: 8080, id: "jenkins"
+  config.vm.network "forwarded_port", guest: 9000, host: 9000, id: "sonarqube"
+  config.vm.network "forwarded_port", guest: 3000, host: 3000, id: "grafana"
+  config.vm.network "forwarded_port", guest: 9090, host: 9090, id: "prometheus"
+  config.vm.network "forwarded_port", guest: 5341, host: 5341, id: "seq"
+  config.vm.network "forwarded_port", guest: 1433, host: 11433, id: "sqlserver"
+  config.vm.network "forwarded_port", guest: 5432, host: 15432, id: "postgres"
+  config.vm.network "forwarded_port", guest: 6379, host: 6379, id: "redis"
+  config.vm.network "forwarded_port", guest: 9443, host: 9443, id: "portainer"
+  
+  # VirtualBox Provider Configuration
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "DevOps-Tools-VM"
+    vb.memory = "8192"  # 8GB RAM (adjust based on your system)
+    vb.cpus = 4         # 4 CPU cores (adjust based on your system)
+    vb.gui = false
+    
+    # Enable virtualization features
+    vb.customize ["modifyvm", :id, "--nested-hw-virt", "on"]
+    vb.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+  end
+  
+  # Shared Folders
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+  config.vm.synced_folder "./shared", "/home/vagrant/shared", create: true
+  
+  # Provisioning Scripts
+  config.vm.provision "shell", path: "scripts/setup-vm.sh"
+  config.vm.provision "shell", path: "scripts/install-docker.sh"
+  config.vm.provision "shell", path: "scripts/install-devops-tools.sh"
+  
+  # Run configuration as vagrant user (not root)
+  config.vm.provision "shell", path: "scripts/configure-tools.sh", privileged: false
+end

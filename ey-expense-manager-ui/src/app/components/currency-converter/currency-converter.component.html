@@ -1,0 +1,83 @@
+<div class="currency-converter">
+  <div class="converter-header">
+    <h3>Currency Converter</h3>
+    <button mat-icon-button (click)="refreshRates()" [disabled]="isLoading" title="Refresh rates">
+      <mat-icon [class.rotating]="isLoading">refresh</mat-icon>
+    </button>
+  </div>
+  
+  <div class="converter-body">
+    <!-- Loading state -->
+    <div class="converter-loading" *ngIf="currencies.length === 0 && isLoading">
+      <mat-spinner diameter="40" mode="indeterminate"></mat-spinner>
+      <p>Loading currency data...</p>
+    </div>
+    
+    <!-- Error message -->
+    <div class="error-message" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <form [formGroup]="converterForm" class="converter-form" *ngIf="currencies.length > 0">
+      <div class="amount-row">
+        <mat-form-field appearance="outline" class="amount-field">
+          <mat-label>Amount</mat-label>
+          <input matInput type="number" formControlName="amount" min="0.01" step="0.01">
+          <mat-error *ngIf="converterForm.get('amount')?.invalid">
+            Please enter a valid amount
+          </mat-error>
+        </mat-form-field>
+      </div>
+      
+      <div class="currency-row">
+        <mat-form-field appearance="outline" class="currency-field">
+          <mat-label>From</mat-label>
+          <mat-select formControlName="fromCurrency">
+            <mat-option *ngFor="let currency of currencies" [value]="currency.code">
+              {{ currency.code }} - {{ currency.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <button mat-icon-button class="swap-btn" (click)="swapCurrencies()" title="Swap currencies">
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+        
+        <mat-form-field appearance="outline" class="currency-field">
+          <mat-label>To</mat-label>
+          <mat-select formControlName="toCurrency">
+            <mat-option *ngFor="let currency of currencies" [value]="currency.code">
+              {{ currency.code }} - {{ currency.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <div class="result-row" *ngIf="conversionResult">
+        <div class="conversion-result">
+          <div class="from-amount">
+            {{ conversionResult.fromAmount | number:'1.2-2' }} {{ conversionResult.fromCurrency }}
+          </div>
+          <div class="conversion-arrow">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+          <div class="to-amount">
+            <span class="result-value">{{ conversionResult.toAmount | number:'1.2-2' }}</span>
+            <span class="result-currency">{{ conversionResult.toCurrency }}</span>
+          </div>
+        </div>
+        <div class="rate-info">
+          <span class="rate-label">Rate:</span>
+          <span class="rate-value">1 {{ conversionResult.fromCurrency }} = {{ conversionResult.rate | number:'1.4-4' }} {{ conversionResult.toCurrency }}</span>
+        </div>
+      </div>
+      
+      <!-- Conversion loader -->
+      <div class="conversion-loading" *ngIf="isLoading && currencies.length > 0">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <span>Converting...</span>
+      </div>
+    </form>
+  </div>
+</div>

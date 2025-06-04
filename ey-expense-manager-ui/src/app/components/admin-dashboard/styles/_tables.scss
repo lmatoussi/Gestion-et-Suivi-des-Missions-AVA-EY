@@ -1,0 +1,446 @@
+// _tables.scss - Table styles and data displays
+
+// Table styling
+.Associer-table-container {
+    .table-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      
+      .table-search {
+        position: relative;
+        
+        .search-input {
+          padding: 0.5rem 1rem 0.5rem 2.5rem;
+          border: 1px solid var(--border-color);
+          border-radius: $border-radius;
+          background-color: var(--bg-card);
+          color: var(--text-primary);
+          width: 220px;
+          transition: all $transition-speed ease;
+          
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+          }
+        }
+        
+        .search-icon {
+          position: absolute;
+          left: 0.8rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: $primary-color;
+        }
+      }
+      
+      .table-filters {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        
+        .filter-select {
+          position: relative;
+          
+          select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: $border-radius;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            appearance: none;
+            transition: all $transition-speed ease;
+            cursor: pointer;
+            
+            &:focus {
+              outline: none;
+              border-color: $primary-color;
+              box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+            }
+          }
+          
+          &::after {
+            content: '\25BC';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $primary-color;
+            font-size: 0.8rem;
+            pointer-events: none;
+          }
+        }
+      }
+      
+      .btn-outline {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: $border-radius;
+        background: none;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all $transition-speed ease;
+        
+        i, .mat-icon {
+          color: $primary-color;
+          font-size: 1.1rem;
+        }
+        
+        &:hover {
+          border-color: $primary-color;
+          color: $black;
+          background-color: rgba($primary-color, 0.1);
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba($primary-color, 0.3);
+      border-radius: 3px;
+      
+      &:hover {
+        background-color: $primary-color;
+      }
+    }
+  }
+  
+  .budget-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    th {
+      font-weight: 500;
+      color: var(--text-primary);
+      background-color: rgba($gray-dark, 0.05);
+      position: relative;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: rgba($gray-dark, 0.2);
+      }
+      
+      &.sortable {
+        cursor: pointer;
+        transition: all $transition-speed ease;
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+          
+          &::after {
+            background-color: $primary-color;
+          }
+        }
+        
+        .sort-icon {
+          margin-left: 0.3rem;
+          color: $primary-color;
+          opacity: 0.5;
+          transition: all $transition-speed ease;
+        }
+        
+        &.sort-asc .sort-icon, &.sort-desc .sort-icon {
+          opacity: 1;
+        }
+      }
+    }
+    
+    tr {
+      transition: all $transition-speed ease;
+      
+      &:hover td {
+        background-color: rgba($primary-color, 0.05);
+      }
+      
+      td {
+        transition: all $transition-speed ease;
+        
+        .cell-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          
+          i, .mat-icon {
+            color: $primary-color;
+            font-size: 1.1rem;
+          }
+        }
+        
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.3rem 0.6rem;
+          border-radius: 1rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+          
+          &.status-active {
+            background-color: rgba($success-color, 0.1);
+            color: $success-color;
+          }
+          
+          &.status-pending {
+            background-color: rgba($warning-color, 0.1);
+            color: $warning-color;
+          }
+          
+          &.status-inactive {
+            background-color: rgba($danger-color, 0.1);
+            color: $danger-color;
+          }
+        }
+        
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          
+          .btn-icon-sm {
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            transition: all $transition-speed ease;
+            
+            i, .mat-icon {
+              font-size: 1rem;
+              color: $primary-color;
+            }
+            
+            &:hover {
+              background-color: rgba($primary-color, 0.1);
+              transform: translateY(-2px);
+              
+              i, .mat-icon {
+                color: $black;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    .utilization-bar {
+      display: flex;
+      align-items: center;
+      background-color: rgba($gray-dark, 0.1);
+      height: 6px;
+      border-radius: 3px;
+      width: 100%;
+      max-width: 150px;
+      position: relative;
+      overflow: hidden;
+      
+      .utilization-progress {
+        height: 100%;
+        border-radius: 3px;
+        transition: all $transition-speed ease;
+        
+        &.high {
+          background-color: $danger-color;
+        }
+        
+        &.medium {
+          background-color: $warning-color;
+        }
+        
+        &.low {
+          background-color: $success-color;
+        }
+        
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          animation: shimmer 2s infinite;
+        }
+      }
+      
+      span {
+        position: absolute;
+        right: -40px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+    }
+  }
+  
+  // Budget allocation history
+  .allocation-history {
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-card);
+      border-radius: $border-radius;
+      overflow: hidden;
+      
+      th, td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      th {
+        background-color: rgba($gray-dark, 0.05);
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
+      }
+      
+      tr:hover td {
+        background-color: rgba($primary-color, 0.05);
+      }
+      
+      .amount {
+        font-weight: 600;
+        transition: all $transition-speed ease;
+        
+        &.positive {
+          color: $success-color;
+        }
+        
+        &.negative {
+          color: $danger-color;
+        }
+      }
+      
+      .allocation-type {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all $transition-speed ease;
+        
+        &.mission {
+          background-color: rgba($gray-dark, 0.1);
+          color: $gray-dark;
+          
+          &:hover {
+            background-color: rgba($primary-color, 0.1);
+            color: $black;
+          }
+        }
+        
+        &.Associer {
+          background-color: rgba($success-color, 0.1);
+          color: $success-color;
+          
+          &:hover {
+            background-color: rgba($success-color, 0.2);
+          }
+        }
+      }
+      
+      .date-cell {
+        display: flex;
+        flex-direction: column;
+        
+        .date-main {
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+        
+        .date-sub {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+      }
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+      gap: 0.5rem;
+      
+      .page-item {
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $border-radius;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all $transition-speed ease;
+        
+        &:hover {
+          border-color: $primary-color;
+          color: $black;
+          background-color: rgba($primary-color, 0.1);
+        }
+        
+        &.active {
+          background-color: $primary-color;
+          border-color: $primary-color;
+          color: $black;
+          font-weight: 600;
+        }
+        
+        &.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          
+          &:hover {
+            background-color: transparent;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            transform: none;
+          }
+        }
+      }
+    }
+  }

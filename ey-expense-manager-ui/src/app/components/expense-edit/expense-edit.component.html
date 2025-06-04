@@ -1,0 +1,180 @@
+<div class="container mt-4">
+  <div class="header text-center mb-4">
+    <img src="assets/eylogo.png" alt="EY Logo" class="ey-logo mb-2">
+    <h2 class="form-title">Edit Expense</h2>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger text-center">
+    {{ error }}
+  </div>
+
+  <!-- Expense Form -->
+  <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
+    <!-- Mission Selection -->
+    <div class="form-group">
+      <label for="missionId">Mission*</label>
+      <select
+            id="missionId"
+            formControlName="missionId"
+            class="form-control"
+            [ngClass]="{
+              'is-invalid':
+                expenseForm.get('missionId')?.invalid &&
+                expenseForm.get('missionId')?.touched
+            }"
+          >
+            <option *ngFor="let mission of missions" [ngValue]="mission.id">
+              {{ mission.idMission }} - {{ mission.nomDeContract }}
+            </option>
+          </select>
+      <div *ngIf="expenseForm.get('missionId')?.invalid && expenseForm.get('missionId')?.touched" class="invalid-feedback">
+        Mission is required.
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">Description*</label>
+      <input 
+        type="text" 
+        id="description" 
+        formControlName="description" 
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('description')?.invalid && expenseForm.get('description')?.touched}"
+        placeholder="Enter a detailed description of the expense"
+      >
+      <div *ngIf="expenseForm.get('description')?.invalid && expenseForm.get('description')?.touched" class="invalid-feedback">
+        Description is required and cannot exceed 500 characters.
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="form-group">
+      <label for="category">Category</label>
+      <select
+        id="category"
+        formControlName="category"
+        class="form-control"
+      >
+        <option value="">Select Category</option>
+        <option *ngFor="let category of categories" [value]="category">
+          {{ category }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Amount and Currency -->
+    <div class="form-group">
+      <label for="amount">Amount*</label>
+      <input 
+        type="number" 
+        id="amount" 
+        formControlName="amount" 
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('amount')?.invalid && expenseForm.get('amount')?.touched}"
+        min="0" 
+        step="0.01"
+      >
+      <div *ngIf="expenseForm.get('amount')?.invalid && expenseForm.get('amount')?.touched" class="invalid-feedback">
+        Amount is required and must be a positive number.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="currency">Currency*</label>
+      <select
+        id="currency"
+        formControlName="currency"
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('currency')?.invalid && expenseForm.get('currency')?.touched}"
+        (change)="onCurrencyChange()"
+      >
+        <option *ngFor="let currency of currencies" [value]="currency">
+          {{ currency }}
+        </option>
+      </select>
+      <div *ngIf="expenseForm.get('currency')?.invalid && expenseForm.get('currency')?.touched" class="invalid-feedback">
+        Currency is required.
+      </div>
+    </div>
+
+    <!-- Converted Amount -->
+    <div class="form-group">
+      <label for="convertedAmount">Converted Amount (TND)</label>
+      <input 
+        type="number" 
+        id="convertedAmount" 
+        formControlName="convertedAmount" 
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('convertedAmount')?.invalid && expenseForm.get('convertedAmount')?.touched}"
+        min="0" 
+        step="0.01"
+      >
+      <div *ngIf="expenseForm.get('convertedAmount')?.invalid && expenseForm.get('convertedAmount')?.touched" class="invalid-feedback">
+        Converted amount must be a positive number.
+      </div>
+    </div>
+
+    <!-- Expense Date -->
+    <div class="form-group">
+      <label for="expenseDate">Expense Date*</label>
+      <input 
+        type="date" 
+        id="expenseDate" 
+        formControlName="expenseDate" 
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('expenseDate')?.invalid && expenseForm.get('expenseDate')?.touched}"
+      >
+      <div *ngIf="expenseForm.get('expenseDate')?.invalid && expenseForm.get('expenseDate')?.touched" class="invalid-feedback">
+        Expense date is required.
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label for="status">Status*</label>
+      <select
+        id="status"
+        formControlName="status"
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('status')?.invalid && expenseForm.get('status')?.touched}"
+      >
+        <option *ngFor="let status of statuses" [value]="status">
+          {{ status }}
+        </option>
+      </select>
+      <div *ngIf="expenseForm.get('status')?.invalid && expenseForm.get('status')?.touched" class="invalid-feedback">
+        Status is required.
+      </div>
+    </div>
+
+    <!-- Receipt URL -->
+    <div class="form-group">
+      <label for="receiptUrl">Receipt URL</label>
+      <input 
+        type="text" 
+        id="receiptUrl" 
+        formControlName="receiptUrl" 
+        class="form-control"
+        [ngClass]="{'is-invalid': expenseForm.get('receiptUrl')?.invalid && expenseForm.get('receiptUrl')?.touched}"
+        placeholder="https://example.com/receipt.pdf"
+      >
+      <div *ngIf="expenseForm.get('receiptUrl')?.invalid && expenseForm.get('receiptUrl')?.touched" class="invalid-feedback">
+        Invalid receipt URL.
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions mt-3">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="submitting || expenseForm.invalid"
+      >
+        {{ submitting ? 'Updating...' : 'Update Expense' }}
+      </button>
+      <a [routerLink]="returnToMissionExpenses ? ['/missions', expenseForm.get('missionId')?.value, 'expenses'] : ['/expenses']" class="btn btn-secondary ml-2">Cancel</a>
+    </div>
+  </form>
+</div>

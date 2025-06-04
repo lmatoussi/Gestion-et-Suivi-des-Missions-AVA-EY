@@ -1,0 +1,214 @@
+// _responsive.scss - Media queries and responsive adjustments
+
+// Responsive design
+@media (max-width: 992px) {
+    .tab-grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .statistics-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .currency-widget {
+      grid-column: span 2;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-dashboard {
+      padding: 1rem;
+    }
+    
+    .hero-banner {
+      height: auto;
+      max-height: none;
+      padding: 1.5rem;
+      
+      .hero-content {
+        h1 {
+          font-size: 2rem;
+        }
+        
+        p {
+          font-size: 1rem;
+        }
+      }
+      
+      .banner-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        
+        .filters {
+          flex-direction: column;
+          width: 100%;
+          
+          .filter-group {
+            width: 100%;
+            
+            select {
+              width: 100%;
+            }
+          }
+        }
+        
+        .action-buttons {
+          width: 100%;
+          justify-content: flex-end;
+          margin-top: 1rem;
+        }
+      }
+    }
+    
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+      
+      .header-left {
+        width: 100%;
+      }
+      
+      .filters {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        
+        .filter-group {
+          white-space: nowrap;
+        }
+      }
+      
+      .action-buttons {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+    
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+    
+    .modal .modal-content {
+      max-width: 90%;
+    }
+    
+    .metrics-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .allocation-history .history-table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .forecast-insights {
+      grid-template-columns: 1fr;
+    }
+    
+    .statistics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .currency-widget {
+      grid-column: span 1;
+    }
+    
+    .currency-converter {
+      .currency-row {
+        flex-direction: column;
+        
+        .swap-btn {
+          transform: rotate(90deg);
+          margin: 0.5rem auto;
+        }
+      }
+      
+      .conversion-result {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+        
+        .conversion-arrow {
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .card {
+      padding: 1rem;
+      
+      .card-content {
+        .amount-compact {
+          font-size: 1.3rem;
+        }
+      }
+      
+      .card-icon {
+        font-size: 1.5rem;
+        padding: 0.6rem;
+      }
+    }
+    
+    .export-dropdown {
+      position: static;
+      
+      .dropdown-menu {
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+    
+    .modal .modal-footer {
+      flex-direction: column;
+      
+      .btn {
+        width: 100%;
+      }
+    }
+    
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .budget-alerts-banner .alert-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.8rem;
+      
+      .alert-icon {
+        margin-right: 0;
+      }
+      
+      .btn-view-all {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    
+    .insight-item {
+      flex-direction: column;
+      
+      .insight-icon {
+        margin-bottom: 0.8rem;
+        margin-right: 0;
+      }
+    }
+    
+    .table-actions {
+      flex-direction: column;
+      align-items: stretch;
+      
+      .table-search {
+        width: 100%;
+        
+        .search-input {
+          width: 100%;
+        }
+      }
+    }
+  }

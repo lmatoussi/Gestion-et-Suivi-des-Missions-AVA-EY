@@ -1,0 +1,95 @@
+z<div class="container mt-4">
+  <div class="header text-center mb-4">
+    <img src="assets/eylogo.png" alt="EY Logo" class="ey-logo mb-2">
+    <h2 class="form-title">Edit Mission</h2>
+    <a routerLink="/missions" class="text-light">← Back to Missions</a>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger text-center">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="text-center text-light mb-4">
+    Loading...
+  </div>
+
+  <form *ngIf="!loading" [formGroup]="missionForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="idMission">Mission ID*</label>
+      <input id="idMission" type="text" class="form-control"
+        formControlName="idMission"
+        [ngClass]="{'is-invalid': missionForm.get('idMission')?.invalid && missionForm.get('idMission')?.touched}">
+    </div>
+
+    <div class="form-group">
+      <label for="engagementCode">Engagement Code</label>
+      <input id="engagementCode" type="text" class="form-control" formControlName="engagementCode">
+    </div>
+
+    <div class="form-group">
+      <label for="nomDeContract">Contract Name*</label>
+      <input id="nomDeContract" type="text" class="form-control" formControlName="nomDeContract">
+    </div>
+
+    <div class="form-group">
+      <label for="client">Client*</label>
+      <input id="client" type="text" class="form-control" formControlName="client">
+    </div>
+
+    <div class="form-group">
+      <label for="dateSignature">Signature Date*</label>
+      <input id="dateSignature" type="date" class="form-control" formControlName="dateSignature">
+    </div>
+
+    <div class="form-group">
+      <label for="pays">Country</label>
+      <input id="pays" type="text" class="form-control" formControlName="pays">
+    </div>
+
+    <div class="form-group">
+      <label for="montantDevise">Amount (Foreign Currency)*</label>
+      <input id="montantDevise" type="number" min="0" step="0.01" class="form-control" formControlName="montantDevise">
+    </div>
+
+    <div class="form-group">
+      <label for="montantTnd">Amount (TND)*</label>
+      <input id="montantTnd" type="number" min="0" step="0.01" class="form-control" formControlName="montantTnd">
+    </div>
+
+    <div class="form-group">
+      <label for="ava">AVA*</label>
+      <input id="ava" type="number" min="0" step="0.01" class="form-control" formControlName="ava">
+    </div>
+
+    <div class="form-group">
+      <label for="associerId">Associer</label>
+      <select id="associerId" class="form-control" formControlName="associerId">
+        <option [ngValue]="null">-- None --</option>
+        <option *ngFor="let associer of associers" [ngValue]="associer.id">
+          {{ associer.nameUser }} {{ associer.surname }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="status">Status*</label>
+      <select id="status" class="form-control" formControlName="status">
+        <option value="">Select Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Active">Active</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <input type="hidden" formControlName="createdBy">
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting || missionForm.invalid">
+        {{ submitting ? 'Updating...' : 'Update Mission' }}
+      </button>
+      <a [routerLink]="['/missions']" class="btn btn-secondary ml-2">Cancel</a>
+    </div>
+  </form>
+</div>

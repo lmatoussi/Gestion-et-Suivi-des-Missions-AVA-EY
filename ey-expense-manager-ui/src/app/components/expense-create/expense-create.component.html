@@ -1,0 +1,425 @@
+<div class="main-container">
+  <div class="side-panel">
+    <div class="logo-container">
+      <img src="assets/eylogo.png" alt="EY Logo" class="ey-logo">
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-circle-container">
+        <div class="progress-circle">
+          <svg viewBox="0 0 36 36" class="circular-chart">
+            <defs>
+              <linearGradient id="expense-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#6272a4" />
+                <stop offset="100%" stop-color="#bd93f9" />
+              </linearGradient>
+            </defs>
+            <path class="circle-bg" d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="circle" 
+              [attr.stroke-dasharray]="formProgress + ', 100'"
+              d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <text x="18" y="20.35" class="percentage">{{formProgress}}%</text>
+          </svg>
+        </div>
+      </div>
+      <h3 class="progress-title">Form Completion</h3>
+      
+      <div class="section-indicators">
+        <div class="section-indicator" 
+             [class.active]="currentSection >= 0" 
+             [class.complete]="formSections[0].complete">
+          <div class="indicator-circle">
+            <mat-icon *ngIf="!formSections[0].complete">info</mat-icon>
+            <mat-icon *ngIf="formSections[0].complete">check</mat-icon>
+          </div>
+          <span class="indicator-label">Basic</span>
+        </div>
+        <div class="section-indicator-line" [class.active]="currentSection >= 1"></div>
+        <div class="section-indicator" 
+             [class.active]="currentSection >= 1" 
+             [class.complete]="formSections[1].complete">
+          <div class="indicator-circle">
+            <mat-icon *ngIf="!formSections[1].complete">attach_money</mat-icon>
+            <mat-icon *ngIf="formSections[1].complete">check</mat-icon>
+          </div>
+          <span class="indicator-label">Financial</span>
+        </div>
+        <div class="section-indicator-line" [class.active]="currentSection >= 2"></div>
+        <div class="section-indicator" 
+             [class.active]="currentSection >= 2" 
+             [class.complete]="formSections[2].complete">
+          <div class="indicator-circle">
+            <mat-icon *ngIf="!formSections[2].complete">description</mat-icon>
+            <mat-icon *ngIf="formSections[2].complete">check</mat-icon>
+          </div>
+          <span class="indicator-label">Details</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-nav">
+      <ng-container *ngFor="let section of formSections; let i = index">
+        <div class="nav-item" 
+             [class.active]="currentSection === i"
+             [class.complete]="section.complete"
+             (click)="goToSection(i)">
+          <div class="nav-icon">
+            <mat-icon>{{section.icon}}</mat-icon>
+            <div class="completion-indicator" *ngIf="section.complete">
+              <mat-icon class="completion-check">check</mat-icon>
+            </div>
+          </div>
+          <span class="nav-text">{{section.name}}</span>
+        </div>
+      </ng-container>
+    </div>
+    
+    <div class="user-info" *ngIf="currentUser">
+      <div class="user-avatar">
+        <span>{{currentUser.nameUser?.charAt(0) || 'U'}}</span>
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{currentUser.nameUser}} {{currentUser.surname}}</div>
+        <div class="user-role">Financial Manager</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="content-panel">
+    <div class="header">
+      <h1>Create New Expense</h1>
+      <p class="subtitle">Enter expense details for financial tracking</p>
+    </div>
+    
+    <div *ngIf="error" class="error-alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    
+    <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
+      <div class="form-section-container">
+        <div class="form-section" 
+             [class.active]="currentSection === 0" 
+             [class.previous]="currentSection > 0"
+             [class.animating]="animating">
+          <div class="section-header">
+            <h2><mat-icon>info</mat-icon> Basic Information</h2>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="missionId">
+                Mission <span *ngIf="isRequired('missionId')" class="required">*</span>
+              </label>
+              <div class="select-group">
+                <mat-icon class="input-icon">business_center</mat-icon>
+                <select
+                  id="missionId"
+                  formControlName="missionId"
+                  [class.has-error]="hasError('missionId')"
+                  [disabled]="missionId !== null"
+                >
+                  <option value="">Select Mission</option>
+                  <option *ngFor="let mission of missions" [value]="mission.id">
+                    {{ mission.idMission }} - {{ mission.nomDeContract }}
+                  </option>
+                </select>
+                <mat-icon class="select-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div *ngIf="hasError('missionId')" class="error-message">
+                {{ getErrorMessage('missionId') }}
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label for="associerId">
+                Associer <span *ngIf="isRequired('associerId')" class="required">*</span>
+              </label>
+              <div class="select-group">
+                <mat-icon class="input-icon">person</mat-icon>
+                <select
+                  id="associerId"
+                  formControlName="associerId"
+                  [class.has-error]="hasError('associerId')"
+                >
+                  <option value="">Select Associer</option>
+                  <option *ngFor="let associer of associers" [value]="associer.id">
+                    {{ associer.nameUser }} {{ associer.surname }}
+                  </option>
+                </select>
+                <mat-icon class="select-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div *ngIf="hasError('associerId')" class="error-message">
+                {{ getErrorMessage('associerId') }}
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label for="category">Category</label>
+              <div class="select-group">
+                <mat-icon class="input-icon">category</mat-icon>
+                <select
+                  id="category"
+                  formControlName="category"
+                  [class.has-error]="hasError('category')"
+                >
+                  <option value="">Select Category</option>
+                  <option *ngFor="let category of categories" [value]="category">
+                    {{ category }}
+                  </option>
+                </select>
+                <mat-icon class="select-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div *ngIf="hasError('category')" class="error-message">
+                {{ getErrorMessage('category') }}
+              </div>
+            </div>
+            
+            <div class="form-field grid-span-2 description-field">
+              <label for="description">
+                Description <span *ngIf="isRequired('description')" class="required">*</span>
+              </label>
+              <div class="input-group">
+                <mat-icon class="input-icon">notes</mat-icon>
+                <textarea 
+                  id="description" 
+                  formControlName="description" 
+                  [class.has-error]="hasError('description')"
+                  placeholder="Enter a detailed description of the expense"
+                  rows="3"></textarea>
+              </div>
+              <div *ngIf="hasError('description')" class="error-message">
+                {{ getErrorMessage('description') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-actions">
+            <button type="button" class="btn btn-next" (click)="nextSection()">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-section" 
+             [class.active]="currentSection === 1"
+             [class.previous]="currentSection > 1"
+             [class.animating]="animating">
+          <div class="section-header">
+            <h2><mat-icon>attach_money</mat-icon> Financial Details</h2>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-field monetary-field">
+              <label for="amount">
+                Amount <span *ngIf="isRequired('amount')" class="required">*</span>
+              </label>
+              <div class="input-group">
+                <mat-icon class="input-icon">payments</mat-icon>
+                <input 
+                  type="number" 
+                  id="amount" 
+                  formControlName="amount" 
+                  [class.has-error]="hasError('amount')"
+                  min="0" 
+                  step="0.01"
+                  placeholder="Enter expense amount"
+                >
+              </div>
+              <div *ngIf="hasError('amount')" class="error-message">
+                {{ getErrorMessage('amount') }}
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label for="currency">
+                Currency <span *ngIf="isRequired('currency')" class="required">*</span>
+              </label>
+              <div class="select-group">
+                <mat-icon class="input-icon">currency_exchange</mat-icon>
+                <select
+                  id="currency"
+                  formControlName="currency"
+                  [class.has-error]="hasError('currency')"
+                  (change)="onCurrencyChange()"
+                >
+                  <option *ngFor="let currency of currencies" [value]="currency">
+                    {{ currency }}
+                  </option>
+                </select>
+                <mat-icon class="select-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div *ngIf="hasError('currency')" class="error-message">
+                {{ getErrorMessage('currency') }}
+              </div>
+            </div>
+            
+            <div class="form-field grid-span-2 monetary-field">
+              <label for="convertedAmount">Converted Amount (TND)</label>
+              <div class="input-group">
+                <mat-icon class="input-icon">swap_horiz</mat-icon>
+                <input 
+                  type="number" 
+                  id="convertedAmount" 
+                  formControlName="convertedAmount" 
+                  [class.has-error]="hasError('convertedAmount')"
+                  min="0" 
+                  step="0.01"
+                  placeholder="Converted amount in TND"
+                >
+              </div>
+              <div *ngIf="hasError('convertedAmount')" class="error-message">
+                {{ getErrorMessage('convertedAmount') }}
+              </div>
+              <div class="info-message">
+                <mat-icon>info</mat-icon>
+                Automatically calculated when currency is TND, otherwise enter manually
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-actions">
+            <button type="button" class="btn btn-prev" (click)="prevSection()">
+              <mat-icon>arrow_back</mat-icon> Previous
+            </button>
+            <button type="button" class="btn btn-next" (click)="nextSection()">
+              Next <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-section" 
+             [class.active]="currentSection === 2"
+             [class.animating]="animating">
+          <div class="section-header">
+            <h2><mat-icon>description</mat-icon> Additional Details</h2>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="expenseDate">
+                Expense Date <span *ngIf="isRequired('expenseDate')" class="required">*</span>
+              </label>
+              <div class="input-group">
+                <mat-icon class="input-icon">event</mat-icon>
+                <input 
+                  type="date" 
+                  id="expenseDate" 
+                  formControlName="expenseDate" 
+                  [class.has-error]="hasError('expenseDate')"
+                >
+              </div>
+              <div *ngIf="hasError('expenseDate')" class="error-message">
+                {{ getErrorMessage('expenseDate') }}
+              </div>
+            </div>
+            
+            <div class="form-field">
+              <label for="status">
+                Status <span *ngIf="isRequired('status')" class="required">*</span>
+              </label>
+              <div class="select-group">
+                <mat-icon class="input-icon">flag</mat-icon>
+                <select
+                  id="status"
+                  formControlName="status"
+                  [class.has-error]="hasError('status')"
+                >
+                  <option *ngFor="let status of statuses" [value]="status">
+                    {{ status }}
+                  </option>
+                </select>
+                <mat-icon class="select-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div *ngIf="hasError('status')" class="error-message">
+                {{ getErrorMessage('status') }}
+              </div>
+            </div>
+            
+            <div class="form-field grid-span-2">
+              <label for="receiptUrl">Receipt URL</label>
+              <div class="input-group">
+                <mat-icon class="input-icon">receipt</mat-icon>
+                <input 
+                  type="text" 
+                  id="receiptUrl" 
+                  formControlName="receiptUrl" 
+                  [class.has-error]="hasError('receiptUrl')"
+                  placeholder="https://example.com/receipt.pdf"
+                >
+              </div>
+              <div *ngIf="hasError('receiptUrl')" class="error-message">
+                {{ getErrorMessage('receiptUrl') }}
+              </div>
+              <div class="info-message">
+                <mat-icon>info</mat-icon>
+                Enter the URL where the receipt is stored (if available)
+              </div>
+            </div>
+            
+            <div class="form-field grid-span-2">
+              <div class="summary-card">
+                <h3><mat-icon class="summary-icon">summarize</mat-icon> Expense Summary</h3>
+                <div class="summary-row">
+                  <div class="summary-label">Mission:</div>
+                  <div class="summary-value">{{ getMissionName() }}</div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Associer:</div>
+                  <div class="summary-value">{{ getAssocierName() }}</div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Category:</div>
+                  <div class="summary-value">{{ getCategory() }}</div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Amount:</div>
+                  <div class="summary-value">
+                    {{ getAmount() }} {{ getCurrency() }}
+                  </div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Converted Amount:</div>
+                  <div class="summary-value">{{ getConvertedAmount() }} TND</div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Date:</div>
+                  <div class="summary-value">{{ getExpenseDate() }}</div>
+                </div>
+                <div class="summary-row">
+                  <div class="summary-label">Status:</div>
+                  <div class="summary-value">{{ getStatus() }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <input type="hidden" formControlName="createdBy">
+          </div>
+            
+          <div class="section-actions">
+            <button type="button" class="btn btn-prev" (click)="prevSection()">
+              <mat-icon>arrow_back</mat-icon> Previous
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-submit" 
+              [disabled]="submitting || expenseForm.invalid"
+            >
+              <mat-icon>save</mat-icon> {{ submitting ? 'Creating...' : 'Create Expense' }}
+            </button>
+            <a 
+              class="btn btn-cancel" 
+              [routerLink]="missionId ? ['/missions', missionId, 'expenses'] : ['/expenses']"
+            >
+              <mat-icon>close</mat-icon> Cancel
+            </a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,269 @@
+// _utilities.scss - Utility classes and helper styles
+
+// Loading indicator
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 1rem;
+    padding: 2rem;
+  
+    .spinner {
+      border: 3px solid var(--border-color);
+      border-top-color: $primary-color;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+    }
+    
+    .spinner-alt {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      
+      &::before, &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: $primary-color;
+      }
+      
+      &::before {
+        animation: spin 1.5s linear infinite;
+      }
+      
+      &::after {
+        border-top-color: $secondary-color;
+        animation: spin 1s linear infinite reverse;
+      }
+    }
+  
+    p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      text-align: center;
+      max-width: 300px;
+      
+      .loading-dots {
+        display: inline-block;
+        
+        &::after {
+          content: '...';
+          display: inline-block;
+          animation: loadingDots 1.5s infinite;
+          width: 1.5rem;
+          text-align: left;
+        }
+      }
+    }
+  }
+  
+  // Skeleton loading
+  .skeleton {
+    background: linear-gradient(90deg, 
+      rgba(var(--border-color), 0.1) 25%, 
+      rgba(var(--border-color), 0.2) 50%, 
+      rgba(var(--border-color), 0.1) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: $border-radius-sm;
+    
+    &.skeleton-text {
+      height: 1rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+      
+      &.skeleton-title {
+        height: 1.5rem;
+        width: 70%;
+      }
+      
+      &.skeleton-subtitle {
+        height: 1.2rem;
+        width: 50%;
+      }
+    }
+    
+    &.skeleton-circle {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+    }
+    
+    &.skeleton-card {
+      height: 100px;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  }
+  
+  // Error container
+  .error-container {
+    padding: 2rem;
+    background-color: rgba($danger-color, 0.1);
+    border-radius: $border-radius;
+    border: 1px solid $danger-color;
+    margin: 2rem auto;
+    max-width: 600px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+  
+    .error-icon {
+      font-size: 3rem;
+      color: $danger-color;
+      margin-bottom: 1rem;
+      animation: pulse 2s infinite ease-in-out;
+    }
+  
+    .error-message {
+      color: $danger-color;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+    
+    .error-details {
+      background-color: rgba($danger-color, 0.05);
+      padding: 1rem;
+      border-radius: $border-radius;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      font-family: monospace;
+      max-height: 150px;
+      overflow-y: auto;
+      color: var(--text-primary);
+    }
+  
+    button {
+      padding: 0.5rem 1.5rem;
+      background-color: $danger-color;
+      color: $white;
+      border: none;
+      border-radius: $border-radius;
+      cursor: pointer;
+      transition: all $transition-speed ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      i, .mat-icon {
+        color: $white;
+      }
+  
+      &:hover {
+        background-color: darken($danger-color, 10%);
+        transform: translateY(-2px);
+        box-shadow: $shadow;
+      }
+    }
+  }
+  
+  // Forecast insights
+  .forecast-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeIn 0.5s ease-in-out;
+    
+    .insight-item {
+      display: flex;
+      background-color: rgba($gray-dark, 0.05);
+      padding: 1rem;
+      border-radius: $border-radius;
+      border-left: 3px solid $gray-dark;
+      transition: all $transition-speed ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow;
+        background-color: rgba($primary-color, 0.1);
+        border-left-color: $primary-color;
+        
+        .insight-icon {
+          color: $black;
+          background-color: rgba($primary-color, 0.2);
+          transform: scale(1.1);
+          
+          i, .mat-icon {
+            color: $black;
+          }
+        }
+        
+        h4 {
+          color: $black;
+        }
+      }
+      
+      &.warning {
+        background-color: rgba($warning-color, 0.05);
+        border-left-color: $warning-color;
+        
+        .insight-icon {
+          background-color: rgba($warning-color, 0.1);
+          
+          i, .mat-icon {
+            color: $warning-color;
+          }
+        }
+        
+        h4 {
+          color: darken($warning-color, 15%);
+        }
+        
+        &:hover {
+          background-color: rgba($warning-color, 0.1);
+          
+          .insight-icon {
+            background-color: rgba($warning-color, 0.2);
+          }
+        }
+      }
+      
+      .insight-icon {
+        font-size: 1.5rem;
+        color: $primary-color;
+        margin-right: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all $transition-speed ease;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background-color: rgba($primary-color, 0.1);
+        flex-shrink: 0;
+        
+        i, .mat-icon {
+          font-size: 1.5rem;
+          color: $primary-color;
+          transition: all $transition-speed ease;
+        }
+      }
+      
+      .insight-content {
+        flex: 1;
+        
+        h4 {
+          margin: 0 0 0.3rem;
+          font-size: 1rem;
+          color: $gray-dark;
+          font-weight: 500;
+          transition: all $transition-speed ease;
+        }
+        
+        p {
+          margin: 0;
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+      }
+    }
+  }

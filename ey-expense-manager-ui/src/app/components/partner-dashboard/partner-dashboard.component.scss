@@ -1,0 +1,501 @@
+// Partner Dashboard Styles
+
+// Variables
+$primary-color: #2468e5;
+$secondary-color: #5c6bc0;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$danger-color: #f44336;
+$light-bg: #f9fafb;
+$dark-bg: #1a1a1a;
+$card-bg-light: #ffffff;
+$card-bg-dark: #2a2a2a;
+$border-radius: 8px;
+$box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+$transition-speed: 0.3s;
+
+// Base styles
+.partner-dashboard {
+  padding: 2rem;
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  background-color: var(--bg-main, $light-bg);
+  color: var(--text-primary, #333);
+
+  &.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+
+    --bg-main: #{$dark-bg};
+    --bg-card: #{$card-bg-dark};
+    --text-primary: #f0f0f0;
+    --text-secondary: #c0c0c0;
+    --border-color: #444444;
+    --chart-tooltip-bg: rgba(50, 50, 50, 0.9);
+
+    .card {
+      background-color: #1e1e1e;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-primary, .btn-secondary {
+      &:hover {
+        filter: brightness(1.2);
+      }
+    }
+
+    .section-title {
+      color: #e0e0e0;
+    }
+
+    .progress-bar {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+// Header styles
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .header-content {
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+      color: $primary-color;
+    }
+
+    .header-subtitle {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .current-date {
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: currentColor;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .dark-mode & {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Loading and error states
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+
+  p {
+    margin-top: 1rem;
+    opacity: 0.7;
+  }
+}
+
+.error-container {
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+
+  .error-message {
+    color: #d32f2f;
+    margin-bottom: 1rem;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #d32f2f;
+    }
+  }
+
+  .dark-mode & {
+    background-color: #3e2723;
+    border-left-color: #e57373;
+
+    .error-message {
+      color: #ef9a9a;
+    }
+  }
+}
+
+// Summary cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    transition: transform $transition-speed ease, box-shadow $transition-speed ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-content {
+      flex: 1;
+
+      h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.7;
+        color: var(--text-secondary, #666);
+      }
+
+      .amount-container {
+        .amount-compact {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: 0.25rem;
+        }
+
+        .amount-full {
+          font-size: 0.9rem;
+          opacity: 0.6;
+        }
+      }
+
+      .mission-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+
+        .mission-stat {
+          text-align: center;
+
+          .stat-value {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 700;
+          }
+
+          .stat-label {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.7;
+          }
+        }
+      }
+
+      .progress-indicator {
+        margin-top: 1rem;
+        height: 6px;
+        background-color: #e0e0e0;
+        border-radius: 3px;
+        position: relative;
+        overflow: hidden;
+
+        .dark-mode & {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+          height: 100%;
+          background-color: #4caf50;
+          border-radius: 3px;
+          transition: width 0.6s ease;
+        }
+
+        .percentage {
+          position: absolute;
+          top: -1.2rem;
+          right: 0;
+          font-size: 0.8rem;
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .card-icon {
+      display: flex;
+      align-items: flex-start;
+      color: #3f51b5;
+
+      .mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    &.ava-used .card-icon {
+      color: #f44336;
+    }
+
+    &.ava-remaining .card-icon {
+      color: #4caf50;
+    }
+
+    &.missions-total .card-icon {
+      color: #ff9800;
+    }
+  }
+}
+
+// Charts and data grid
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  .chart-container, .recent-expenses {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+
+    .dark-mode & {
+      background-color: #1e1e1e;
+    }
+
+    .section-title {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+
+      mat-icon {
+        opacity: 0.7;
+      }
+    }
+
+    .chart-body {
+      height: 300px;
+      position: relative;
+    }
+  }
+
+  .expenses-list {
+    .no-expenses {
+      padding: 2rem;
+      text-align: center;
+      opacity: 0.7;
+    }
+
+    .expense-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+
+        .dark-mode & {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+      }
+
+      .expense-icon {
+        margin-right: 1rem;
+        color: #3f51b5;
+
+        .dark-mode & {
+          color: #7986cb;
+        }
+      }
+
+      .expense-details {
+        flex: 1;
+
+        .expense-title {
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+
+        .expense-mission, .expense-date {
+          font-size: 0.85rem;
+          opacity: 0.7;
+        }
+      }
+
+      .expense-amount {
+        font-weight: 500;
+
+        .dark-mode & {
+          color: #81c784;
+        }
+      }
+
+      .dark-mode & {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .view-all {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+
+      .btn-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3f51b5;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+
+        .dark-mode & {
+          color: #7986cb;
+        }
+      }
+    }
+  }
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+
+    &.btn-primary {
+      background-color: #3f51b5;
+      color: white;
+
+      &:hover {
+        background-color: #303f9f;
+      }
+
+      .dark-mode & {
+        background-color: #5c6bc0;
+
+        &:hover {
+          background-color: #3f51b5;
+        }
+      }
+    }
+
+    &.btn-secondary {
+      background-color: #ff4081;
+      color: white;
+
+      &:hover {
+        background-color: #e91e63;
+      }
+
+      .dark-mode & {
+        background-color: #ec407a;
+
+        &:hover {
+          background-color: #d81b60;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 992px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+
+    .expenses-trend, .mission-status, .expense-categories {
+      grid-column: span 1;
+    }
+
+    .recent-expenses {
+      grid-column: span 1;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .partner-dashboard {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .header-actions {
+      margin-top: 1rem;
+      align-self: flex-end;
+    }
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    a {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

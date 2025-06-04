@@ -1,0 +1,211 @@
+<div class="auth-container">
+  <div class="auth-background">
+    <img src="assets/ey-reframe-your-future-digital-city-static.jpg" alt="EY Background" class="background-image">
+  </div>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo-container">
+        <img src="assets/eylogo.png" alt="EY Logo" class="logo">
+      </div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join the EY platform by creating your account</p>
+    </div>
+    
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-grid">
+        <!-- User ID -->
+        <div class="form-group">
+          <label for="idUser">User ID <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-id-card"></i>
+            </div>
+            <input 
+              type="text" 
+              id="idUser" 
+              formControlName="idUser" 
+              placeholder="Enter user ID"
+              [ngClass]="{'input-error': registerForm.get('idUser')?.invalid && (registerForm.get('idUser')?.dirty || registerForm.get('idUser')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('idUser')?.invalid && (registerForm.get('idUser')?.dirty || registerForm.get('idUser')?.touched)">
+            User ID is required and cannot exceed 50 characters.
+          </div>
+        </div>
+        
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="nameUser">First Name <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input 
+              type="text" 
+              id="nameUser" 
+              formControlName="nameUser" 
+              placeholder="Enter first name"
+              [ngClass]="{'input-error': registerForm.get('nameUser')?.invalid && (registerForm.get('nameUser')?.dirty || registerForm.get('nameUser')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('nameUser')?.invalid && (registerForm.get('nameUser')?.dirty || registerForm.get('nameUser')?.touched)">
+            First name is required and cannot exceed 100 characters.
+          </div>
+        </div>
+        
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="surname">Last Name <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input 
+              type="text" 
+              id="surname" 
+              formControlName="surname" 
+              placeholder="Enter last name"
+              [ngClass]="{'input-error': registerForm.get('surname')?.invalid && (registerForm.get('surname')?.dirty || registerForm.get('surname')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('surname')?.invalid && (registerForm.get('surname')?.dirty || registerForm.get('surname')?.touched)">
+            Last name is required and cannot exceed 100 characters.
+          </div>
+        </div>
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              placeholder="Enter email address"
+              [ngClass]="{'input-error': registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)">
+            <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</span>
+            <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
+          </div>
+        </div>
+        
+        <!-- Password -->
+        <div class="form-group grid-span-2">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <input 
+              [type]="passwordVisibility ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password" 
+              placeholder="Create a strong password"
+              [ngClass]="{'input-error': registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)}"
+            >
+            <div class="input-icon-right" (click)="togglePasswordVisibility()">
+              <i class="fas" [ngClass]="passwordVisibility ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </div>
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)">
+            <div>Password must be at least 6 characters and include:</div>
+            <ul class="password-requirements">
+              <li>At least one lowercase letter</li>
+              <li>At least one uppercase letter</li>
+              <li>At least one number</li>
+              <li>At least one special character</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Role -->
+        <div class="form-group">
+          <label for="role">Role <span class="required">*</span></label>
+          <div class="select-container">
+            <div class="input-icon">
+              <i class="fas fa-user-tag"></i>
+            </div>
+            <select 
+              id="role" 
+              formControlName="role"
+              [ngClass]="{'input-error': registerForm.get('role')?.invalid && (registerForm.get('role')?.dirty || registerForm.get('role')?.touched)}"
+            >
+              <option *ngFor="let role of roles" [value]="role">{{ getRoleName(role) }}</option>
+            </select>
+            <div class="select-arrow">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- GPN -->
+        <div class="form-group">
+          <label for="gpn">GPN</label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-fingerprint"></i>
+            </div>
+            <input 
+              type="text" 
+              id="gpn" 
+              formControlName="gpn" 
+              placeholder="Enter GPN (optional)"
+              [ngClass]="{'input-error': registerForm.get('gpn')?.invalid && (registerForm.get('gpn')?.dirty || registerForm.get('gpn')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="registerForm.get('gpn')?.invalid && (registerForm.get('gpn')?.dirty || registerForm.get('gpn')?.touched)">
+            GPN cannot exceed 50 characters.
+          </div>
+        </div>
+        
+        <!-- Profile Image -->
+        <div class="form-group grid-span-2">
+          <label for="profileImage">Profile Image</label>
+          <div class="file-upload-container">
+            <div class="file-upload-area" (click)="fileInput.click()" [class.has-preview]="imagePreview">
+              <input 
+                type="file" 
+                id="profileImage" 
+                #fileInput
+                (change)="onFileSelected($event)" 
+                accept="image/jpeg,image/png" 
+                hidden
+              >
+              
+              <div *ngIf="!imagePreview" class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Click to upload profile image</span>
+                <small>JPEG or PNG, max 5MB</small>
+              </div>
+              
+              <div *ngIf="imagePreview" class="image-preview">
+                <img [src]="imagePreview" alt="Profile preview">
+                <div class="preview-overlay">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Change image</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button type="submit" class="auth-button" [disabled]="registerForm.invalid || isSubmitting">
+        <span *ngIf="isSubmitting">
+          <i class="fas fa-circle-notch fa-spin"></i> Creating Account...
+        </span>
+        <span *ngIf="!isSubmitting">Create Account</span>
+      </button>
+      
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/login" class="auth-link">Sign In</a></p>
+      </div>
+    </form>
+  </div>
+</div>

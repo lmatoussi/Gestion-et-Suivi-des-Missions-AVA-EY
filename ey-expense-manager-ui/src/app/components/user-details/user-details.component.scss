@@ -1,0 +1,464 @@
+@use "sass:color";
+/* Dark mode colors */
+$dark-bg: #181c24;
+$dark-bg-alt: #232837;
+$dark-border: #292e3d;
+$dark-card-bg: #1e2635;
+$white: #fff;
+$primary: #3f51b5;
+$success: #4caf50;
+$danger: #f44336;
+$info: #17a2b8;
+$warning: #ff9800;
+$muted: #b0b8c9;
+
+/* Role badge colors */
+$role-admin: #3f51b5;
+$role-user: #2196f3;
+$role-manager: #ff9800;
+$role-Associer: #9c27b0;
+$role-employe: #4caf50;
+
+/* General styles */
+.user-details-container.dark-mode {
+  font-family: 'Roboto', Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto 2rem;
+  color: $white;
+  background-color: $dark-bg;
+  border-radius: 14px;
+  box-shadow: 0 6px 32px 0 rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  padding: 0 0 1rem 0;
+  margin-top: 20px;
+
+  /* Hero banner style */
+  .hero-banner {
+    position: relative;
+    height: 25vh;
+    min-height: 200px;
+    max-height: 300px;
+    background-image: linear-gradient(rgba(10, 30, 60, 0.7), rgba(10, 30, 60, 0.7)),
+                      url('/assets/ey-lynn-canyon-suspension-bridge-static.webp');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: flex-end;
+
+    .hero-content {
+      padding: 2rem;
+      max-width: 800px;
+
+      h1 {
+        font-size: 2.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 600px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  /* Loading & Error styles */
+  .loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: $primary;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: $muted;
+      font-size: 1.1rem;
+    }
+  }
+
+  .alert {
+    background: rgba($danger, 0.1);
+    color: $danger;
+    border-left: 4px solid $danger;
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 1.5rem;
+    display: flex;
+    align-items: center;
+    
+    .btn-retry {
+      margin-left: auto;
+      background: $danger;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      
+      &:hover {
+        background: darken($danger, 10%);
+      }
+    }
+  }
+
+  /* Profile container */
+  .profile-container {
+    padding: 0 2rem 2rem;
+    
+    .profile-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 2rem 0;
+      border-bottom: 1px solid $dark-border;
+      margin-bottom: 2rem;
+      position: relative;
+      
+      .profile-image-container {
+        width: 120px;
+        height: 120px;
+        margin-right: 2rem;
+        
+        .profile-image {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid $primary;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: linear-gradient(135deg, $primary, darken($primary, 20%));
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2.5rem;
+          font-weight: bold;
+          border: 4px solid $primary;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+      }
+      
+      .profile-title {
+        flex: 1;
+        
+        h2 {
+          font-size: 2.2rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          color: $white;
+        }
+        
+        .user-id {
+          font-size: 1rem;
+          color: $muted;
+          margin-top: 0.5rem;
+          
+          span {
+            font-weight: bold;
+            color: lighten($muted, 10%);
+          }
+        }
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-left: auto;
+        
+        @media (max-width: 768px) {
+          margin-top: 1rem;
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.6rem 1.2rem;
+          border-radius: 6px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          i {
+            font-size: 1rem;
+          }
+          
+          &:hover {
+            transform: translateY(-2px);
+          }
+        }
+        
+        .btn-edit {
+          background: $warning;
+          color: $dark-bg;
+          border: none;
+          
+          &:hover {
+            background: lighten($warning, 10%);
+          }
+        }
+        
+        .btn-delete {
+          background: rgba($danger, 0.2);
+          color: $danger;
+          border: 1px solid $danger;
+          
+          &:hover {
+            background: $danger;
+            color: white;
+          }
+        }
+      }
+    }
+    
+    .profile-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      
+      .info-card {
+        background: $dark-card-bg;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+          background: rgba($primary, 0.1);
+          padding: 1.2rem;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid $dark-border;
+          
+          i {
+            font-size: 1.5rem;
+            margin-right: 0.8rem;
+            color: $primary;
+          }
+          
+          h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: $white;
+          }
+        }
+        
+        .card-content {
+          padding: 1.2rem;
+          
+          .info-row {
+            display: flex;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba($dark-border, 0.5);
+            
+            &:last-child {
+              margin-bottom: 0;
+              padding-bottom: 0;
+              border-bottom: none;
+            }
+            
+            .info-label {
+              flex: 0 0 40%;
+              font-weight: 500;
+              color: $muted;
+            }
+            
+            .info-value {
+              flex: 0 0 60%;
+              font-weight: 500;
+              color: $white;
+            }
+          }
+        }
+      }
+      
+      /* System info card special styles */
+      .system-info {
+        .card-header {
+          background: rgba($info, 0.1);
+          
+          i {
+            color: $info;
+          }
+        }
+      }
+      
+      .back-button-container {
+        grid-column: 1 / -1;
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: flex-start;
+        
+        .btn-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: $dark-bg-alt;
+          color: $white;
+          border: 1px solid $dark-border;
+          padding: 0.7rem 1.5rem;
+          border-radius: 6px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover {
+            background: lighten($dark-bg-alt, 5%);
+            transform: translateY(-2px);
+          }
+        }
+      }
+    }
+  }
+
+  /* Role badges */
+  .role-badge {
+    padding: 5px 14px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    min-width: 88px;
+    text-align: center;
+    
+    &.role-badge-admin {
+      background: rgba($role-admin, 0.2);
+      color: lighten($role-admin, 20%);
+    }
+    
+    &.role-badge-user {
+      background: rgba($role-user, 0.2);
+      color: lighten($role-user, 20%);
+    }
+    
+    &.role-badge-manager {
+      background: rgba($role-manager, 0.2);
+      color: lighten($role-manager, 20%);
+    }
+    
+    &.role-badge-Associer {
+      background: rgba($role-Associer, 0.2);
+      color: lighten($role-Associer, 20%);
+    }
+    
+    &.role-badge-employe {
+      background: rgba($role-employe, 0.2);
+      color: lighten($role-employe, 20%);
+    }
+  }
+  
+  /* Status badges */
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    
+    &.status-active {
+      background: rgba($success, 0.2);
+      color: lighten($success, 20%);
+    }
+    
+    &.status-inactive {
+      background: rgba($danger, 0.2);
+      color: lighten($danger, 20%);
+    }
+    
+    &.status-pending {
+      background: rgba($warning, 0.2);
+      color: lighten($warning, 20%);
+    }
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .user-details-container.dark-mode {
+    .profile-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .profile-image-container {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+      }
+      
+      .profile-title {
+        margin-bottom: 1.5rem;
+      }
+      
+      .action-buttons {
+        justify-content: center;
+      }
+    }
+    
+    .hero-banner .hero-content {
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .user-details-container.dark-mode {
+    .profile-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-banner .hero-content {
+      padding: 1.5rem;
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+    
+    .profile-header {
+      .profile-image-container {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .profile-title h2 {
+        font-size: 1.8rem;
+      }
+    }
+  }
+}

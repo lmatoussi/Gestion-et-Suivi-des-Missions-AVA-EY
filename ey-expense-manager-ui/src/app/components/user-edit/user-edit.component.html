@@ -1,0 +1,225 @@
+<div class="auth-container">
+  <div class="auth-background">
+    <img src="assets/ey-reframe-your-future-digital-city-static.jpg" alt="EY Background" class="background-image">
+  </div>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo-container">
+        <img src="assets/eylogo.png" alt="EY Logo" class="logo">
+      </div>
+      <h1 class="auth-title">Edit User Profile</h1>
+      <p class="auth-subtitle">Update user information and settings</p>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="spinner-container">
+        <div class="spinner"></div>
+      </div>
+      <p>Loading user data...</p>
+    </div>
+    
+    <div *ngIf="errorMessage" class="error-alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>{{ errorMessage }}</span>
+      <button (click)="goBack()" class="back-button">Back</button>
+    </div>
+    
+    <form *ngIf="!isLoading && !errorMessage" [formGroup]="editForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-grid">
+        <!-- User ID -->
+        <div class="form-group">
+          <label for="idUser">User ID <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-id-card"></i>
+            </div>
+            <input 
+              type="text" 
+              id="idUser" 
+              formControlName="idUser" 
+              placeholder="Enter user ID"
+              [ngClass]="{'input-error': editForm.get('idUser')?.invalid && (editForm.get('idUser')?.dirty || editForm.get('idUser')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('idUser')?.invalid && (editForm.get('idUser')?.dirty || editForm.get('idUser')?.touched)">
+            User ID is required and cannot exceed 50 characters.
+          </div>
+        </div>
+        
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="nameUser">First Name <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input 
+              type="text" 
+              id="nameUser" 
+              formControlName="nameUser" 
+              placeholder="Enter first name"
+              [ngClass]="{'input-error': editForm.get('nameUser')?.invalid && (editForm.get('nameUser')?.dirty || editForm.get('nameUser')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('nameUser')?.invalid && (editForm.get('nameUser')?.dirty || editForm.get('nameUser')?.touched)">
+            First name is required and cannot exceed 100 characters.
+          </div>
+        </div>
+        
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="surname">Last Name <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input 
+              type="text" 
+              id="surname" 
+              formControlName="surname" 
+              placeholder="Enter last name"
+              [ngClass]="{'input-error': editForm.get('surname')?.invalid && (editForm.get('surname')?.dirty || editForm.get('surname')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('surname')?.invalid && (editForm.get('surname')?.dirty || editForm.get('surname')?.touched)">
+            Last name is required and cannot exceed 100 characters.
+          </div>
+        </div>
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              placeholder="Enter email address"
+              [ngClass]="{'input-error': editForm.get('email')?.invalid && (editForm.get('email')?.dirty || editForm.get('email')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('email')?.invalid && (editForm.get('email')?.dirty || editForm.get('email')?.touched)">
+            <span *ngIf="editForm.get('email')?.errors?.['required']">Email is required.</span>
+            <span *ngIf="editForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
+          </div>
+        </div>
+        
+        <!-- Password -->
+        <div class="form-group grid-span-2">
+          <label for="password">Password <small class="optional">(Leave blank to keep current password)</small></label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <input 
+              type="password" 
+              id="password" 
+              formControlName="password" 
+              placeholder="Enter new password (optional)"
+              [ngClass]="{'input-error': editForm.get('password')?.invalid && (editForm.get('password')?.dirty || editForm.get('password')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('password')?.invalid && (editForm.get('password')?.dirty || editForm.get('password')?.touched)">
+            <div>Password must include:</div>
+            <ul class="password-requirements">
+              <li>At least one lowercase letter</li>
+              <li>At least one uppercase letter</li>
+              <li>At least one number</li>
+              <li>At least one special character</li>
+              <li>Minimum 6 characters</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Role -->
+        <div class="form-group">
+          <label for="role">Role <span class="required">*</span></label>
+          <div class="select-container">
+            <div class="input-icon">
+              <i class="fas fa-user-tag"></i>
+            </div>
+            <select 
+              id="role" 
+              formControlName="role"
+              [ngClass]="{'input-error': editForm.get('role')?.invalid && (editForm.get('role')?.dirty || editForm.get('role')?.touched)}"
+            >
+              <option *ngFor="let role of roles" [value]="role">{{ getRoleName(role) }}</option>
+            </select>
+            <div class="select-arrow">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- GPN -->
+        <div class="form-group">
+          <label for="gpn">GPN</label>
+          <div class="input-container">
+            <div class="input-icon">
+              <i class="fas fa-fingerprint"></i>
+            </div>
+            <input 
+              type="text" 
+              id="gpn" 
+              formControlName="gpn" 
+              placeholder="Enter GPN (optional)"
+              [ngClass]="{'input-error': editForm.get('gpn')?.invalid && (editForm.get('gpn')?.dirty || editForm.get('gpn')?.touched)}"
+            >
+          </div>
+          <div class="error-message" *ngIf="editForm.get('gpn')?.invalid && (editForm.get('gpn')?.dirty || editForm.get('gpn')?.touched)">
+            GPN cannot exceed 50 characters.
+          </div>
+        </div>
+        
+        <!-- Profile Image -->
+        <div class="form-group grid-span-2">
+          <label for="profileImage">Profile Image</label>
+          <div class="file-upload-container">
+            <div class="file-upload-area" (click)="fileInput.click()" [class.has-preview]="imagePreview">
+              <input 
+                type="file" 
+                id="profileImage" 
+                #fileInput
+                (change)="onFileSelected($event)" 
+                accept="image/jpeg,image/png" 
+                hidden
+              >
+              
+              <div *ngIf="!imagePreview" class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Click to upload profile image</span>
+                <small>JPEG or PNG, max 5MB</small>
+              </div>
+              
+              <div *ngIf="imagePreview" class="image-preview">
+                <img [src]="imagePreview" alt="Profile preview">
+                <div class="preview-overlay">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Change image</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button type="submit" class="auth-button" [disabled]="editForm.invalid || isSubmitting">
+          <span *ngIf="isSubmitting">
+            <i class="fas fa-circle-notch fa-spin"></i> Updating User...
+          </span>
+          <span *ngIf="!isSubmitting">
+            <i class="fas fa-save"></i> Save Changes
+          </span>
+        </button>
+        <button type="button" class="cancel-button" (click)="goBack()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

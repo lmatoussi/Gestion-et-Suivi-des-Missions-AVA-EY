@@ -1,0 +1,104 @@
+.header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #000; /* Black background */
+  color: white;
+  padding: 0 16px;
+  height: 64px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-toolbar nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+mat-toolbar nav a:hover {
+  text-decoration: underline;
+  color: #FFD700; /* EY yellow highlight on hover */
+}
+
+/* User actions container to group profile and logout button */
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Space between profile and logout button */
+}
+
+/* Profile image styling */
+.user-profile {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* Make it circular */
+  object-fit: cover; /* Maintain aspect ratio and cover container */
+  border: 2px solid #FFD700; /* Add EY yellow border */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+}
+
+.profile-image:hover {
+  transform: scale(1.05); /* Slight enlargement on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+/* Logout button styling */
+.logout-button {
+  background-color: transparent;
+  color: white;
+  border: 1px solid #FFD700; /* EY yellow border */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px; /* Rounded corners */
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #FFD700; /* EY yellow background on hover */
+  color: black; /* Black text on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3); /* Golden glow */
+}
+
+.logout-button mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  margin-right: 4px;
+}
+
+/* Custom styling for the mat-menu */
+::ng-deep .mat-menu-panel {
+  min-width: 200px !important;
+}
+
+::ng-deep .mat-menu-content {
+  padding: 8px 0 !important;
+}
+
+::ng-deep .mat-menu-item {
+  font-size: 14px;
+  line-height: 36px;
+  height: 36px;
+}
+
+/* For the user name in menu */
+::ng-deep .mat-menu-item[disabled] {
+  color: #000 !important;
+  opacity: 1 !important;
+}

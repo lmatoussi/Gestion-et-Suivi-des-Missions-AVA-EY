@@ -1,0 +1,544 @@
+// _charts.scss - Chart and data visualization styles
+
+// Enhanced Chart Styles
+.chart-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        
+        .legend-color {
+          width: 1rem;
+          height: 1rem;
+          border-radius: 3px;
+          
+          &.color-primary {
+            background-color: $primary-color;
+          }
+          
+          &.color-secondary {
+            background-color: $secondary-color;
+          }
+          
+          &.color-success {
+            background-color: $success-color;
+          }
+          
+          &.color-warning {
+            background-color: $warning-color;
+          }
+          
+          &.color-danger {
+            background-color: $danger-color;
+          }
+        }
+      }
+    }
+    
+    .chart-tooltip {
+      position: absolute;
+      background-color: var(--chart-tooltip-bg);
+      border: 1px solid var(--chart-tooltip-border);
+      border-radius: $border-radius;
+      padding: 0.8rem;
+      box-shadow: $shadow;
+      pointer-events: none;
+      z-index: 10;
+      min-width: 150px;
+      
+      .tooltip-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.3rem;
+      }
+      
+      .tooltip-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        
+        .tooltip-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.85rem;
+          
+          .item-label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--text-secondary);
+            
+            .item-color {
+              width: 0.8rem;
+              height: 0.8rem;
+              border-radius: 2px;
+            }
+          }
+          
+          .item-value {
+            font-weight: 600;
+            color: var(--text-primary);
+          }
+        }
+      }
+    }
+    
+    .chart-controls {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      gap: 0.5rem;
+      
+      .chart-control-btn {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all $transition-speed ease;
+        
+        i, .mat-icon {
+          font-size: 1rem;
+          color: $primary-color;
+        }
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+          border-color: $primary-color;
+          transform: translateY(-2px);
+        }
+      }
+    }
+    
+    // Chart types
+    .bar-chart, .line-chart, .pie-chart, .area-chart {
+      height: 100%;
+      width: 100%;
+      
+      .chart-bar {
+        fill: $primary-color;
+        transition: all $transition-speed ease;
+        
+        &:hover {
+          fill: darken($primary-color, 10%);
+        }
+      }
+      
+      .chart-line {
+        stroke: $primary-color;
+        stroke-width: 2;
+        fill: none;
+      }
+      
+      .chart-area {
+        fill: rgba($primary-color, 0.1);
+      }
+      
+      .chart-pie-slice {
+        transition: all $transition-speed ease;
+        
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+      
+      .chart-axis {
+        .axis-line {
+          stroke: var(--chart-grid);
+        }
+        
+        .axis-text {
+          fill: var(--text-secondary);
+          font-size: 0.8rem;
+        }
+        
+        .axis-tick {
+          stroke: var(--chart-grid);
+        }
+      }
+      
+      .chart-grid {
+        stroke: var(--chart-grid);
+        stroke-width: 1;
+        stroke-dasharray: 3, 3;
+        opacity: 0.5;
+      }
+      
+      .chart-point {
+        fill: $primary-color;
+        stroke: white;
+        stroke-width: 2;
+        transition: all $transition-speed ease;
+        
+        &:hover {
+          r: 6;
+          fill: darken($primary-color, 10%);
+        }
+      }
+    }
+  }
+  
+  // Tabbed navigation
+  .dashboard-tabs {
+    background-color: var(--bg-card);
+    border-radius: $border-radius;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: all $transition-speed ease;
+    animation: fadeIn 0.5s ease-in-out;
+    
+    &:hover {
+      box-shadow: $shadow-hover;
+    }
+    
+    .tabs-header {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      
+      &::-webkit-scrollbar {
+        height: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba($primary-color, 0.3);
+        border-radius: 3px;
+      }
+      
+      .tab-button {
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+        transition: all $transition-speed ease;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        i, .mat-icon {
+          font-size: 1.1rem;
+          color: $primary-color;
+        }
+        
+        &:hover {
+          color: $black;
+          background-color: rgba($primary-color, 0.1);
+        }
+        
+        &.active {
+          color: $black;
+          
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: $primary-color;
+            animation: slideInUp 0.3s ease-out;
+          }
+        }
+        
+        .tab-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 1.2rem;
+          height: 1.2rem;
+          padding: 0 0.3rem;
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: $black;
+          background-color: $primary-color;
+          border-radius: 1rem;
+          margin-left: 0.3rem;
+        }
+      }
+      
+      .export-dropdown {
+        margin-left: auto;
+        padding: 0.5rem 1rem;
+        position: relative;
+        
+        .dropdown-toggle {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+          color: var(--text-secondary);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all $transition-speed ease;
+          
+          i, .mat-icon {
+            color: $primary-color;
+          }
+          
+          &:hover {
+            color: $black;
+          }
+        }
+        
+        .dropdown-menu {
+          position: absolute;
+          right: 1rem;
+          top: calc(100% + 0.5rem);
+          background-color: var(--bg-card);
+          border-radius: $border-radius;
+          box-shadow: var(--shadow);
+          min-width: 180px;
+          z-index: 100;
+          display: none;
+          overflow: hidden;
+          border: 1px solid var(--border-color);
+          animation: fadeIn 0.2s ease-in-out;
+          
+          &.show {
+            display: block;
+          }
+          
+          .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            background: none;
+            border: none;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all $transition-speed ease;
+            
+            i, .mat-icon {
+              color: $primary-color;
+              font-size: 1.1rem;
+            }
+            
+            &:hover {
+              background-color: rgba($primary-color, 0.1);
+              color: $black;
+            }
+          }
+        }
+      }
+    }
+    
+    .tabs-content {
+      min-height: 400px;
+      position: relative;
+      
+      .tab-pane {
+        display: none;
+        padding: 1.5rem;
+        animation: fadeIn 0.3s ease-in-out;
+        
+        &.active {
+          display: block;
+        }
+      }
+      
+      .tab-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.2rem;
+        
+        .chart-container,
+        .forecast-container,
+        .metrics-container,
+        .missions-summary,
+        .allocations-container,
+        .Associer-table-container {
+          background-color: var(--bg-secondary);
+          border-radius: $border-radius;
+          padding: 1.2rem;
+          transition: all $transition-speed ease;
+          border-left: 3px solid transparent;
+          
+          &:hover {
+            box-shadow: $shadow-hover;
+            border-left-color: $primary-color;
+            transform: translateY(-3px);
+          }
+          
+          .section-title {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            
+            i, .mat-icon {
+              color: $primary-color;
+              font-size: 1.2rem;
+            }
+          }
+          
+          .chart-body {
+            position: relative;
+            height: 300px;
+          }
+        }
+        
+        .chart-container {
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+        }
+      }
+    }
+  }
+  
+  // Metrics grid
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+    animation: fadeIn 0.5s ease-in-out;
+  
+    .metric-card {
+      background-color: var(--bg-card);
+      padding: 1rem;
+      border-radius: $border-radius;
+      box-shadow: var(--shadow);
+      transition: all $transition-speed ease;
+      border-left: 2px solid transparent;
+      animation: slideInUp 0.5s ease-out;
+      animation-fill-mode: both;
+      
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.1}s;
+        }
+      }
+  
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-hover;
+        border-left-color: $primary-color;
+        
+        .metric-value {
+          color: $black;
+        }
+        
+        .metric-icon {
+          transform: scale(1.1);
+          background-color: rgba($primary-color, 0.2);
+          
+          i, .mat-icon {
+            color: $black;
+          }
+        }
+      }
+      
+      .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        
+        .metric-name {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+        
+        .metric-icon {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 50%;
+          background-color: rgba($primary-color, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all $transition-speed ease;
+          
+          i, .mat-icon {
+            font-size: 1rem;
+            color: $primary-color;
+            transition: all $transition-speed ease;
+          }
+        }
+      }
+  
+      .metric-value {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: $gray-dark;
+        transition: all $transition-speed ease;
+        margin: 0.5rem 0;
+      }
+  
+      .metric-change {
+        display: flex;
+        align-items: center;
+        margin-top: 0.4rem;
+        font-size: 0.8rem;
+  
+        &.positive {
+          color: $success-color;
+        }
+  
+        &.negative {
+          color: $danger-color;
+        }
+  
+        i, .mat-icon {
+          margin-right: 0.3rem;
+          font-size: 1rem;
+        }
+      }
+      
+      .metric-chart {
+        height: 30px;
+        margin-top: 0.5rem;
+        
+        .mini-sparkline {
+          width: 100%;
+          height: 100%;
+          
+          path {
+            stroke: $primary-color;
+            stroke-width: 2;
+            fill: none;
+          }
+          
+          circle {
+            fill: $primary-color;
+            r: 3;
+          }
+        }
+      }
+    }
+  }
