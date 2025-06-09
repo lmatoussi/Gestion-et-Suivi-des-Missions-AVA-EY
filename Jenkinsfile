@@ -154,7 +154,7 @@ pipeline {
     
     post {
         always {
-            node {
+            node('built-in') {
                 // Clean up workspace
                 cleanWs()
             }
