@@ -8,10 +8,9 @@ pipeline {
         NODE_OPTIONS = "--max-old-space-size=4096"
         SONAR_TOKEN = credentials('sonarqube-token')
     }
-    
-    tools {
+      tools {
         dotnetsdk 'dotnet8'
-        nodejs 'nodejs-16'
+        nodejs 'nodejs'
     }
 
     stages {
@@ -31,12 +30,13 @@ pipeline {
         }
 
         stage('Backend - Test') {
-            steps {
-                dir('EYExpenseManager') {
+            steps {                dir('EYExpenseManager') {
                     sh 'dotnet test --no-restore --verbosity normal'
                 }
             }
-        }        stage('Backend - Sonar Analysis') {
+        }
+        
+        stage('Backend - Sonar Analysis') {
             steps {
                 dir('EYExpenseManager') {
                     withSonarQubeEnv('SonarQube') {
@@ -65,12 +65,13 @@ pipeline {
         }
 
         stage('Frontend - Test') {
-            steps {
-                dir('ey-expense-manager-ui') {
+            steps {                dir('ey-expense-manager-ui') {
                     sh 'npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
-        }        stage('Frontend - Sonar Analysis') {
+        }
+        
+        stage('Frontend - Sonar Analysis') {
             steps {
                 dir('ey-expense-manager-ui') {
                     withSonarQubeEnv('SonarQube') {
