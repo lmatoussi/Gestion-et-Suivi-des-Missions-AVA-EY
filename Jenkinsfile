@@ -8,8 +8,8 @@ pipeline {
         NODE_OPTIONS = "--max-old-space-size=4096"
         SONAR_TOKEN = credentials('sonarqube-token')
     }
-      tools {
-        dotnetsdk 'dotnet8'
+    
+    tools {
         nodejs 'nodejs'
     }
 
@@ -17,6 +17,45 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        
+        stage('Install Tools') {
+            steps {
+                sh '''
+                    # Install .NET SDK 8 if not already installed
+                    if [ ! -d "/usr/share/dotnet" ]; then
+                        mkdir -p /usr/share/dotnet
+                    fi
+                    
+                    if ! command -v dotnet &> /dev/null; then
+                        # Download and install .NET SDK 8.0
+                        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+                        chmod +x dotnet-install.sh
+                        ./dotnet-install.sh --version 8.0.100 --install-dir /usr/share/dotnet
+                        rm dotnet-install.sh
+                    fi
+                    
+                    # Verify .NET installation
+                    dotnet --info
+                    
+                    # Install SonarScanner for .NET
+                    dotnet tool install --global dotnet-sonarscanner || true
+                    export PATH="$PATH:$HOME/.dotnet/tools"
+                    
+                    # Install SonarScanner CLI if needed
+                    if ! command -v sonar-scanner &> /dev/null; then
+                        mkdir -p /opt/sonar-scanner
+                        curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip -o sonar-scanner.zip
+                        unzip -o sonar-scanner.zip -d /opt
+                        mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+                        ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner
+                        rm sonar-scanner.zip
+                    fi
+                    
+                    # Verify SonarScanner installation
+                    sonar-scanner --version || echo "SonarScanner not properly installed"
+                '''
             }
         }
 
@@ -30,7 +69,8 @@ pipeline {
         }
 
         stage('Backend - Test') {
-            steps {                dir('EYExpenseManager') {
+            steps {
+                dir('EYExpenseManager') {
                     sh 'dotnet test --no-restore --verbosity normal'
                 }
             }
@@ -40,9 +80,13 @@ pipeline {
             steps {
                 dir('EYExpenseManager') {
                     withSonarQubeEnv('SonarQube') {
-                        sh 'dotnet sonarscanner begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"'
-                        sh 'dotnet build --no-incremental'
-                        sh 'dotnet sonarscanner end /d:sonar.login="${SONAR_AUTH_TOKEN}"'
+                        sh '''
+                            # Ensure SonarScanner is in the PATH
+                            export PATH="$PATH:$HOME/.dotnet/tools"
+                            dotnet sonarscanner begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"
+                            dotnet build --no-incremental
+                            dotnet sonarscanner end /d:sonar.login="${SONAR_AUTH_TOKEN}"
+                        '''
                     }
                 }
             }
@@ -65,7 +109,8 @@ pipeline {
         }
 
         stage('Frontend - Test') {
-            steps {                dir('ey-expense-manager-ui') {
+            steps {
+                dir('ey-expense-manager-ui') {
                     sh 'npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
@@ -75,7 +120,10 @@ pipeline {
             steps {
                 dir('ey-expense-manager-ui') {
                     withSonarQubeEnv('SonarQube') {
-                        sh 'sonar-scanner -Dsonar.projectKey=ey-expense-manager-ui -Dsonar.projectName="EY Expense Manager UI" -Dsonar.sources=src -Dsonar.projectVersion=1.0.0'
+                        sh '''
+                            export PATH="$PATH:/opt/sonar-scanner/bin"
+                            sonar-scanner -Dsonar.projectKey=ey-expense-manager-ui -Dsonar.projectName="EY Expense Manager UI" -Dsonar.sources=src -Dsonar.projectVersion=1.0.0
+                        '''
                     }
                 }
             }
@@ -106,8 +154,10 @@ pipeline {
     
     post {
         always {
-            // Clean up workspace
-            cleanWs()
+            node {
+                // Clean up workspace
+                cleanWs()
+            }
         }
         success {
             // Notifications for successful build
