@@ -6,6 +6,12 @@ pipeline {
         DOTNET_ROOT = "/usr/share/dotnet"
         PATH = "$PATH:/usr/share/dotnet"
         NODE_OPTIONS = "--max-old-space-size=4096"
+        SONAR_TOKEN = credentials('sonarqube-token')
+    }
+    
+    tools {
+        dotnetsdk 'dotnet8'
+        nodejs 'nodejs-16'
     }
 
     stages {
@@ -30,13 +36,11 @@ pipeline {
                     sh 'dotnet test --no-restore --verbosity normal'
                 }
             }
-        }
-
-        stage('Backend - Sonar Analysis') {
+        }        stage('Backend - Sonar Analysis') {
             steps {
                 dir('EYExpenseManager') {
                     withSonarQubeEnv('SonarQube') {
-                        sh 'dotnet sonarscanner begin /k:"EYExpenseManager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}"'
+                        sh 'dotnet sonarscanner begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"'
                         sh 'dotnet build --no-incremental'
                         sh 'dotnet sonarscanner end /d:sonar.login="${SONAR_AUTH_TOKEN}"'
                     }
@@ -66,13 +70,11 @@ pipeline {
                     sh 'npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
-        }
-
-        stage('Frontend - Sonar Analysis') {
+        }        stage('Frontend - Sonar Analysis') {
             steps {
                 dir('ey-expense-manager-ui') {
                     withSonarQubeEnv('SonarQube') {
-                        sh 'sonar-scanner -Dsonar.projectKey=EYExpenseManagerUI -Dsonar.sources=src'
+                        sh 'sonar-scanner -Dsonar.projectKey=ey-expense-manager-ui -Dsonar.projectName="EY Expense Manager UI" -Dsonar.sources=src -Dsonar.projectVersion=1.0.0'
                     }
                 }
             }
