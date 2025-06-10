@@ -85,10 +85,11 @@ pipeline {
                         export PATH="$PATH:/usr/share/dotnet"
                         echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc
                     fi
-                    
-                    # Verify .NET installation
+                      # Verify .NET installation
                     echo "Checking .NET installation:"
-                    dotnet --info || echo ".NET installation failed"                    # Install SonarScanner for .NET
+                    dotnet --info || echo ".NET installation failed"
+                    
+                    # Install SonarScanner for .NET
                     echo "Setting up dotnet-sonarscanner..."
                     # Export temp home to avoid permission issues
                     export DOTNET_CLI_HOME="/tmp/dotnet_cli_home"
@@ -121,12 +122,12 @@ pipeline {
                         cd $WORKSPACE
                     fi
                     
-                    # Create symlinks to ensure the tool is accessible from various paths
-                    mkdir -p $HOME/.dotnet/tools || true
+                    # Create symlinks to ensure the tool is accessible from various paths                    mkdir -p $HOME/.dotnet/tools || true
                     if [ -f "$DOTNET_CLI_HOME/.dotnet/tools/dotnet-sonarscanner" ]; then
                         ln -sf $DOTNET_CLI_HOME/.dotnet/tools/dotnet-sonarscanner $HOME/.dotnet/tools/dotnet-sonarscanner || true
                     fi
-                      # Make sure the sonarscanner is in PATH
+                    
+                    # Make sure the sonarscanner is in PATH
                     export PATH="$PATH:$HOME/.dotnet/tools:$DOTNET_CLI_HOME/.dotnet/tools:$WORKSPACE/tools/.dotnet/tools"
                     echo "export PATH=$PATH:$HOME/.dotnet/tools:$DOTNET_CLI_HOME/.dotnet/tools:$WORKSPACE/tools/.dotnet/tools" >> ~/.bashrc
                     
@@ -217,7 +218,7 @@ pipeline {
                 }
             }
         }
-          stage('Backend - Sonar Analysis') {
+        stage('Backend - Sonar Analysis') {
             steps {
                 dir('EYExpenseManager') {
                     withSonarQubeEnv('SonarQube') {
@@ -297,15 +298,15 @@ pipeline {
                     sh 'npm install'
                 }
             }
-        }
-
-        stage('Frontend - Build') {
+        }        stage('Frontend - Build') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'npm run build -- --configuration=production'
                 }
             }
-        }        stage('Frontend - Test') {
+        }
+        
+        stage('Frontend - Test') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'export CHROME_BIN=/usr/bin/chromium && npm test -- --watch=false --browsers=ChromeHeadless'
@@ -397,10 +398,10 @@ pipeline {
                     else
                         echo "Docker socket not found at /var/run/docker.sock"
                     fi
-                    
-                    # Make sure we continue even if Docker isn't fully accessible
+                      # Make sure we continue even if Docker isn't fully accessible
                     echo "Docker permission setup complete"
-                    true                '''
+                    true
+                '''
                 
                 // Backend Docker image
                 dir('EYExpenseManager') {
@@ -420,9 +421,9 @@ pipeline {
                         else
                             echo "WARNING: Could not build Docker image - skipping this step"
                         fi
-                        
-                        # Make sure the script doesn't fail even if Docker commands failed
-                        true                    '''
+                          # Make sure the script doesn't fail even if Docker commands failed
+                        true
+                    '''
                 }
                 
                 // Frontend Docker image
