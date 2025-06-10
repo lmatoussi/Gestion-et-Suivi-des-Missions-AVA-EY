@@ -20,6 +20,38 @@ pipeline {
             }
         }
         
+        stage('Install System Dependencies') {
+            steps {
+                sh '''
+                    # Install necessary packages for downloading and installing tools
+                    echo "Installing system dependencies..."
+                    apt-get update -y
+                    apt-get install -y wget curl unzip apt-transport-https ca-certificates gnupg lsb-release
+                    
+                    # Install Docker CLI
+                    echo "Setting up Docker repository..."
+                    mkdir -p /etc/apt/keyrings
+                    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+                    
+                    apt-get update -y
+                    apt-get install -y docker-ce-cli
+                    
+                    # Setup Docker socket access
+                    echo "Configuring Docker socket access..."
+                    # We'll use Docker from the host via the Docker socket
+                    # Docker socket should be mounted in the container
+                    
+                    # Verify installations
+                    echo "Checking installed tools:"
+                    wget --version || echo "wget not installed properly"
+                    curl --version || echo "curl not installed properly"
+                    unzip -v || echo "unzip not installed properly"
+                    docker --version || echo "docker not installed properly"
+                '''
+            }
+        }
+        
         stage('Install Tools') {
             steps {
                 sh '''
@@ -30,21 +62,36 @@ pipeline {
                     
                     if ! command -v dotnet &> /dev/null; then
                         # Download and install .NET SDK 8.0
+                        echo "Downloading .NET install script..."
                         wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+                        
+                        echo "Making script executable..."
                         chmod +x dotnet-install.sh
+                        
+                        echo "Installing .NET SDK 8.0..."
                         ./dotnet-install.sh --version 8.0.100 --install-dir /usr/share/dotnet
+                        
+                        echo "Cleaning up..."
                         rm dotnet-install.sh
+                        
+                        # Add dotnet to the PATH
+                        export PATH="$PATH:/usr/share/dotnet"
+                        echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc
                     fi
                     
                     # Verify .NET installation
-                    dotnet --info
+                    echo "Checking .NET installation:"
+                    dotnet --info || echo ".NET installation failed"
                     
                     # Install SonarScanner for .NET
+                    echo "Installing SonarScanner for .NET..."
                     dotnet tool install --global dotnet-sonarscanner || true
                     export PATH="$PATH:$HOME/.dotnet/tools"
+                    echo "export PATH=$PATH:$HOME/.dotnet/tools" >> ~/.bashrc
                     
                     # Install SonarScanner CLI if needed
                     if ! command -v sonar-scanner &> /dev/null; then
+                        echo "Installing SonarScanner CLI..."
                         mkdir -p /opt/sonar-scanner
                         curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip -o sonar-scanner.zip
                         unzip -o sonar-scanner.zip -d /opt
@@ -54,6 +101,7 @@ pipeline {
                     fi
                     
                     # Verify SonarScanner installation
+                    echo "Checking SonarScanner installation:"
                     sonar-scanner --version || echo "SonarScanner not properly installed"
                 '''
             }
