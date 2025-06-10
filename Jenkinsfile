@@ -32,12 +32,26 @@ pipeline {
                     # Install Chromium for Angular tests
                     echo "Installing Chromium for Angular tests..."
                     apt-get install -y chromium
-                    
-                    # Check if Docker is available (without installing)
+                      # Check if Docker is available (without installing)
                     echo "Checking Docker availability..."
                     if command -v docker &> /dev/null; then
-                        echo "Docker is already installed:"
-                        docker --version
+                        echo "Docker command is available:"
+                        if docker --version; then
+                            echo "Docker client is working properly"
+                        else
+                            echo "Docker client exists but cannot be executed. Checking permissions..."
+                            ls -la $(which docker)
+                            echo "Docker socket permissions:"
+                            ls -la /var/run/docker.sock || echo "Docker socket not found"
+                        fi
+                        
+                        # Check if docker is in docker group
+                        echo "Docker group members:"
+                        getent group docker || echo "Docker group doesn't exist"
+                        
+                        # Check current user and groups
+                        echo "Current user:"
+                        id
                     else
                         echo "WARNING: Docker command not found. Docker-related steps might fail."
                     fi
@@ -238,11 +252,23 @@ pipeline {
                     '''
                 }
             }
-        }
-
-        stage('Deploy to Development') {
+        }        stage('Deploy to Development') {
             steps {
-                sh 'docker-compose -f docker-compose.dev.yml up -d'
+                sh '''
+                    # Export DB_PASSWORD for docker-compose
+                    export DB_PASSWORD=${DB_PASSWORD:-StrongPassword123!}
+                    
+                    # Try running docker-compose normally first
+                    if ! docker-compose -f docker-compose.dev.yml up -d; then
+                        echo "Trying with sudo..."
+                        sudo docker-compose -f docker-compose.dev.yml up -d
+                    fi
+                    
+                    echo "Development environment deployed:"
+                    if command -v docker ps &> /dev/null; then
+                        docker ps || sudo docker ps
+                    fi
+                '''
             }
         }
     }
