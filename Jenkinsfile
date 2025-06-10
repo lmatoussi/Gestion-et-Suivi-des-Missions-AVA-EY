@@ -89,12 +89,15 @@ pipeline {
                     # Verify .NET installation
                     echo "Checking .NET installation:"
                     dotnet --info || echo ".NET installation failed"
-                    
-                    # Install SonarScanner for .NET
+                      # Install SonarScanner for .NET
                     echo "Installing SonarScanner for .NET..."
                     dotnet tool install --global dotnet-sonarscanner || true
-                    export PATH="$PATH:$HOME/.dotnet/tools"
-                    echo "export PATH=$PATH:$HOME/.dotnet/tools" >> ~/.bashrc
+                    # Make sure to use correct path for Jenkins user
+                    export PATH="$PATH:/tmp/dotnet_cli_home/.dotnet/tools"
+                    echo "export PATH=$PATH:/tmp/dotnet_cli_home/.dotnet/tools" >> ~/.bashrc
+                    # Create symlink to ensure the tool is accessible
+                    mkdir -p $HOME/.dotnet/tools || true
+                    ln -sf /tmp/dotnet_cli_home/.dotnet/tools/dotnet-sonarscanner $HOME/.dotnet/tools/dotnet-sonarscanner || true
                     
                     # Install SonarScanner CLI if needed
                     if ! command -v sonar-scanner &> /dev/null; then
