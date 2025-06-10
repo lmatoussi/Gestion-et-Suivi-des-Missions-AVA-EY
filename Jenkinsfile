@@ -26,28 +26,22 @@ pipeline {
                     # Install necessary packages for downloading and installing tools
                     echo "Installing system dependencies..."
                     apt-get update -y
-                    apt-get install -y wget curl unzip apt-transport-https ca-certificates gnupg lsb-release
+                    apt-get install -y wget curl unzip apt-transport-https ca-certificates
                     
-                    # Install Docker CLI
-                    echo "Setting up Docker repository..."
-                    mkdir -p /etc/apt/keyrings
-                    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-                    
-                    apt-get update -y
-                    apt-get install -y docker-ce-cli
-                    
-                    # Setup Docker socket access
-                    echo "Configuring Docker socket access..."
-                    # We'll use Docker from the host via the Docker socket
-                    # Docker socket should be mounted in the container
+                    # Check if Docker is available (without installing)
+                    echo "Checking Docker availability..."
+                    if command -v docker &> /dev/null; then
+                        echo "Docker is already installed:"
+                        docker --version
+                    else
+                        echo "WARNING: Docker command not found. Docker-related steps might fail."
+                    fi
                     
                     # Verify installations
                     echo "Checking installed tools:"
                     wget --version || echo "wget not installed properly"
                     curl --version || echo "curl not installed properly"
                     unzip -v || echo "unzip not installed properly"
-                    docker --version || echo "docker not installed properly"
                 '''
             }
         }
