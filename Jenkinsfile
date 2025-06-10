@@ -1,14 +1,12 @@
 pipeline {
     agent any
-    
+
     environment {
         DOTNET_CLI_HOME = "/tmp/dotnet_cli_home"
         DOTNET_ROOT = "/usr/share/dotnet"
         PATH = "$PATH:/usr/share/dotnet"
         NODE_OPTIONS = "--max-old-space-size=4096"
         SONAR_TOKEN = credentials('sonarqube-token')
-        CHROME_BIN = "/usr/bin/chromium"
-        DB_PASSWORD = credentials('db-password') // Add database password as a Jenkins credential
     }
     
     tools {
@@ -30,29 +28,11 @@ pipeline {
                     apt-get update -y
                     apt-get install -y wget curl unzip apt-transport-https ca-certificates
                     
-                    # Install Chromium for Angular tests
-                    echo "Installing Chromium for Angular tests..."
-                    apt-get install -y chromium
-                      # Check if Docker is available (without installing)
+                    # Check if Docker is available (without installing)
                     echo "Checking Docker availability..."
                     if command -v docker &> /dev/null; then
-                        echo "Docker command is available:"
-                        if docker --version; then
-                            echo "Docker client is working properly"
-                        else
-                            echo "Docker client exists but cannot be executed. Checking permissions..."
-                            ls -la $(which docker)
-                            echo "Docker socket permissions:"
-                            ls -la /var/run/docker.sock || echo "Docker socket not found"
-                        fi
-                        
-                        # Check if docker is in docker group
-                        echo "Docker group members:"
-                        getent group docker || echo "Docker group doesn't exist"
-                        
-                        # Check current user and groups
-                        echo "Current user:"
-                        id
+                        echo "Docker is already installed:"
+                        docker --version
                     else
                         echo "WARNING: Docker command not found. Docker-related steps might fail."
                     fi
@@ -62,7 +42,6 @@ pipeline {
                     wget --version || echo "wget not installed properly"
                     curl --version || echo "curl not installed properly"
                     unzip -v || echo "unzip not installed properly"
-                    chromium --version || echo "chromium not installed properly"
                 '''
             }
         }
@@ -161,18 +140,20 @@ pipeline {
                     sh 'npm install'
                 }
             }
-        }        stage('Frontend - Build') {
+        }
+
+        stage('Frontend - Build') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'npm run build -- --configuration=production'
                 }
             }
         }
-        
+
         stage('Frontend - Test') {
             steps {
                 dir('ey-expense-manager-ui') {
-                    sh 'export CHROME_BIN=/usr/bin/chromium && npm test -- --watch=false --browsers=ChromeHeadless'
+                    sh 'npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
         }
@@ -192,85 +173,23 @@ pipeline {
         
         stage('Docker Build & Publish') {
             steps {
-                // Use the Docker socket from the host with sudo
-                sh '''
-                    # Add jenkins user to docker group (might require restart)
-                    if grep -q docker /etc/group; then
-                        echo "Docker group exists"
-                        if ! id -nG jenkins | grep -qw "docker"; then
-                            echo "Adding jenkins to docker group"
-                            sudo usermod -aG docker jenkins || true
-                        fi
-                    else
-                        echo "Docker group doesn't exist - trying to create"
-                        sudo groupadd docker || true
-                        sudo usermod -aG docker jenkins || true
-                    fi
-                    
-                    # Set appropriate permissions for Docker socket
-                    if [ -e /var/run/docker.sock ]; then
-                        echo "Setting permissions for Docker socket"
-                        sudo chmod 666 /var/run/docker.sock || true
-                    else
-                        echo "Docker socket not found at /var/run/docker.sock"
-                    fi
-                '''
-                
                 // Backend Docker image
                 dir('EYExpenseManager') {
-                    sh '''
-                        # Debug information
-                        echo "Current user: $(whoami)"
-                        echo "Docker socket permissions: $(ls -la /var/run/docker.sock || echo 'Docker socket not available')"
-                        
-                        # Use sudo if needed
-                        if ! docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
-                            echo "Trying with sudo..."
-                            sudo docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .
-                        fi
-                        
-                        if ! docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest; then
-                            echo "Trying with sudo..."
-                            sudo docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest
-                        fi
-                    '''
+                    sh 'docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .'
+                    sh 'docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest'
                 }
                 
                 // Frontend Docker image
                 dir('ey-expense-manager-ui') {
-                    sh '''
-                        # Use sudo if needed
-                        if ! docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .; then
-                            echo "Trying with sudo..."
-                            sudo docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .
-                        fi
-                        
-                        if ! docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest; then
-                            echo "Trying with sudo..."
-                            sudo docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest
-                        fi
-                    '''
+                    sh 'docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .'
+                    sh 'docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest'
                 }
             }
         }
-        
+
         stage('Deploy to Development') {
             steps {
-                sh '''
-                    # Export DB_PASSWORD for docker-compose
-                    export DB_PASSWORD=${DB_PASSWORD:-StrongPassword123!}
-                    
-                    # Try running docker-compose normally first
-                    if ! docker-compose -f docker-compose.dev.yml up -d; then
-                        echo "Trying with sudo..."
-                        sudo docker-compose -f docker-compose.dev.yml up -d
-                    fi
-                    
-                    echo "Development environment deployed:"
-                    if command -v docker ps &> /dev/null; then
-                        docker ps || sudo docker ps
-                    fi
-                '''
+                sh 'docker-compose -f docker-compose.dev.yml up -d'
             }
         }
     }
