@@ -170,8 +170,7 @@ pipeline {
                 }
             }
         }
-        
-        stage('Frontend - Sonar Analysis') {
+          stage('Frontend - Sonar Analysis') {
             steps {
                 dir('ey-expense-manager-ui') {
                     withSonarQubeEnv('SonarQube') {
@@ -182,7 +181,9 @@ pipeline {
                     }
                 }
             }
-        }        stage('Docker Build & Publish') {
+        }
+        
+        stage('Docker Build & Publish') {
             steps {
                 // Use the Docker socket from the host with sudo
                 sh '''
@@ -211,9 +212,9 @@ pipeline {
                     
                     # Make sure we continue even if Docker isn't fully accessible
                     echo "Docker permission setup complete"
-                    true
-                '''
-                  // Backend Docker image
+                    true                '''
+                
+                // Backend Docker image
                 dir('EYExpenseManager') {
                     sh '''
                         # Debug information
@@ -233,10 +234,10 @@ pipeline {
                         fi
                         
                         # Make sure the script doesn't fail even if Docker commands failed
-                        true
-                    '''
+                        true                    '''
                 }
-                  // Frontend Docker image
+                
+                // Frontend Docker image
                 dir('ey-expense-manager-ui') {
                     sh '''
                         # Try to build Docker image, but don't fail the pipeline if Docker isn't working
@@ -256,7 +257,9 @@ pipeline {
                     '''
                 }
             }
-        }        stage('Deploy to Development') {
+        }
+        
+        stage('Deploy to Development') {
             steps {
                 sh '''
                     # Export DB_PASSWORD for docker-compose if needed
