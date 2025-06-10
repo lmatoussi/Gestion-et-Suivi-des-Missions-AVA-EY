@@ -80,10 +80,10 @@ pipeline {
                         
                         echo "Cleaning up..."
                         rm dotnet-install.sh
-                        
-                        # Add dotnet to the PATH
+                          # Add dotnet to the PATH
                         export PATH="$PATH:/usr/share/dotnet"
-                        echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc                    fi
+                        echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc
+                    fi
                     
                     # Verify .NET installation
                     echo "Checking .NET installation:"
