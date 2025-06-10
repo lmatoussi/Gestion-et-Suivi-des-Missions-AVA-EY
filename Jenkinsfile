@@ -7,6 +7,7 @@ pipeline {
         PATH = "$PATH:/usr/share/dotnet"
         NODE_OPTIONS = "--max-old-space-size=4096"
         SONAR_TOKEN = credentials('sonarqube-token')
+        CHROME_BIN = "/usr/bin/chromium"
     }
     
     tools {
@@ -28,6 +29,10 @@ pipeline {
                     apt-get update -y
                     apt-get install -y wget curl unzip apt-transport-https ca-certificates
                     
+                    # Install Chromium for Angular tests
+                    echo "Installing Chromium for Angular tests..."
+                    apt-get install -y chromium
+                    
                     # Check if Docker is available (without installing)
                     echo "Checking Docker availability..."
                     if command -v docker &> /dev/null; then
@@ -42,6 +47,7 @@ pipeline {
                     wget --version || echo "wget not installed properly"
                     curl --version || echo "curl not installed properly"
                     unzip -v || echo "unzip not installed properly"
+                    chromium --version || echo "chromium not installed properly"
                 '''
             }
         }
@@ -153,7 +159,7 @@ pipeline {
         stage('Frontend - Test') {
             steps {
                 dir('ey-expense-manager-ui') {
-                    sh 'npm test -- --watch=false --browsers=ChromeHeadless'
+                    sh 'export CHROME_BIN=/usr/bin/chromium && npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
         }
