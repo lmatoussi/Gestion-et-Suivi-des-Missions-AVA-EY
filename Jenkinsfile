@@ -1,5 +1,7 @@
 pipeline {
-    agent any    environment {
+    agent any
+    
+    environment {
         DOTNET_CLI_HOME = "/tmp/dotnet_cli_home"
         DOTNET_ROOT = "/usr/share/dotnet"
         PATH = "$PATH:/usr/share/dotnet"
@@ -188,8 +190,7 @@ pipeline {
                     }
                 }
             }
-        }
-          stage('Docker Build & Publish') {
+        }        stage('Docker Build & Publish') {
             steps {
                 // Use the Docker socket from the host with sudo
                 sh '''
@@ -251,7 +252,9 @@ pipeline {
                     '''
                 }
             }
-        }        stage('Deploy to Development') {
+        }
+        
+        stage('Deploy to Development') {
             steps {
                 sh '''
                     # Export DB_PASSWORD for docker-compose
