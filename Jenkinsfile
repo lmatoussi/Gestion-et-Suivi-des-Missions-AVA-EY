@@ -176,19 +176,66 @@ pipeline {
                 }
             }
         }
-        
-        stage('Docker Build & Publish') {
+          stage('Docker Build & Publish') {
             steps {
+                // Use the Docker socket from the host with sudo
+                sh '''
+                    # Add jenkins user to docker group (might require restart)
+                    if grep -q docker /etc/group; then
+                        echo "Docker group exists"
+                        if ! id -nG jenkins | grep -qw "docker"; then
+                            echo "Adding jenkins to docker group"
+                            sudo usermod -aG docker jenkins || true
+                        fi
+                    else
+                        echo "Docker group doesn't exist - trying to create"
+                        sudo groupadd docker || true
+                        sudo usermod -aG docker jenkins || true
+                    fi
+                    
+                    # Set appropriate permissions for Docker socket
+                    if [ -e /var/run/docker.sock ]; then
+                        echo "Setting permissions for Docker socket"
+                        sudo chmod 666 /var/run/docker.sock || true
+                    else
+                        echo "Docker socket not found at /var/run/docker.sock"
+                    fi
+                '''
+                
                 // Backend Docker image
                 dir('EYExpenseManager') {
-                    sh 'docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .'
-                    sh 'docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest'
+                    sh '''
+                        # Debug information
+                        echo "Current user: $(whoami)"
+                        echo "Docker socket permissions: $(ls -la /var/run/docker.sock || echo 'Docker socket not available')"
+                        
+                        # Use sudo if needed
+                        if ! docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
+                            echo "Trying with sudo..."
+                            sudo docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .
+                        fi
+                        
+                        if ! docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest; then
+                            echo "Trying with sudo..."
+                            sudo docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest
+                        fi
+                    '''
                 }
                 
                 // Frontend Docker image
                 dir('ey-expense-manager-ui') {
-                    sh 'docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .'
-                    sh 'docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest'
+                    sh '''
+                        # Use sudo if needed
+                        if ! docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .; then
+                            echo "Trying with sudo..."
+                            sudo docker build -t eyexpensemanager-ui:${BUILD_NUMBER} -f Dockerfile .
+                        fi
+                        
+                        if ! docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest; then
+                            echo "Trying with sudo..."
+                            sudo docker tag eyexpensemanager-ui:${BUILD_NUMBER} eyexpensemanager-ui:latest
+                        fi
+                    '''
                 }
             }
         }
