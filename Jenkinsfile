@@ -30,9 +30,9 @@ pipeline {
                     apt-get install -y wget curl unzip apt-transport-https ca-certificates
                     
                     # Install Chromium for Angular tests
-                    echo "Installing Chromium for Angular tests..."
-                    apt-get install -y chromium
-                      # Check if Docker is available (without installing)
+                    echo "Installing Chromium for Angular tests..."                    apt-get install -y chromium
+                    
+                    # Check if Docker is available(without installing)
                     echo "Checking Docker availability..."
                     if command -v docker &> /dev/null; then
                         echo "Docker command found, checking permissions..."
@@ -83,9 +83,9 @@ pipeline {
                         
                         # Add dotnet to the PATH
                         export PATH="$PATH:/usr/share/dotnet"
-                        echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc
-                    fi
-                      # Verify .NET installation
+                        echo "export PATH=$PATH:/usr/share/dotnet" >> ~/.bashrc                    fi
+                    
+                    # Verify .NET installation
                     echo "Checking .NET installation:"
                     dotnet --info || echo ".NET installation failed"
                     
@@ -122,7 +122,8 @@ pipeline {
                         cd $WORKSPACE
                     fi
                     
-                    # Create symlinks to ensure the tool is accessible from various paths                    mkdir -p $HOME/.dotnet/tools || true
+                    # Create symlinks to ensure the tool is accessible from various paths
+                    mkdir -p $HOME/.dotnet/tools || true
                     if [ -f "$DOTNET_CLI_HOME/.dotnet/tools/dotnet-sonarscanner" ]; then
                         ln -sf $DOTNET_CLI_HOME/.dotnet/tools/dotnet-sonarscanner $HOME/.dotnet/tools/dotnet-sonarscanner || true
                     fi
@@ -218,6 +219,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Backend - Sonar Analysis') {
             steps {
                 dir('EYExpenseManager') {
@@ -291,14 +293,16 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Frontend - Install Dependencies') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'npm install'
                 }
             }
-        }        stage('Frontend - Build') {
+        }
+        
+        stage('Frontend - Build') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'npm run build -- --configuration=production'
@@ -389,8 +393,7 @@ pipeline {
                         sudo usermod -aG docker jenkins || echo "Could not add jenkins to docker group"
                     fi
                     
-                    # Set appropriate permissions for Docker socket
-                    if [ -e /var/run/docker.sock ]; then
+                    # Set appropriate permissions for Docker socket                    if [ -e /var/run/docker.sock ]; then
                         echo "Setting permissions for Docker socket"
                         sudo chmod 666 /var/run/docker.sock || echo "Could not set permissions on Docker socket"
                         echo "Current permissions for Docker socket:"
@@ -398,7 +401,8 @@ pipeline {
                     else
                         echo "Docker socket not found at /var/run/docker.sock"
                     fi
-                      # Make sure we continue even if Docker isn't fully accessible
+                    
+                    # Make sure we continue even if Docker isn't fully accessible
                     echo "Docker permission setup complete"
                     true
                 '''
@@ -411,8 +415,7 @@ pipeline {
                         echo "Docker socket permissions: $(ls -la /var/run/docker.sock || echo 'Docker socket not available')"
                         
                         # Try to build Docker image, but don't fail the pipeline if Docker isn't working
-                        echo "Attempting to build backend Docker image..."
-                        if docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
+                        echo "Attempting to build backend Docker image..."                        if docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
                             echo "Docker build succeeded normally"
                             docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest || echo "Failed to tag image"
                         elif sudo docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
@@ -421,7 +424,8 @@ pipeline {
                         else
                             echo "WARNING: Could not build Docker image - skipping this step"
                         fi
-                          # Make sure the script doesn't fail even if Docker commands failed
+                        
+                        # Make sure the script doesn't fail even if Docker commands failed
                         true
                     '''
                 }
