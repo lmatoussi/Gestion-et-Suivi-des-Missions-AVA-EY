@@ -305,15 +305,15 @@ pipeline {
                     sh 'npm run build -- --configuration=production'
                 }
             }
-        }
-
-        stage('Frontend - Test') {
+        }        stage('Frontend - Test') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'export CHROME_BIN=/usr/bin/chromium && npm test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
-        }        stage('Frontend - Sonar Analysis') {
+        }
+        
+        stage('Frontend - Sonar Analysis') {
             steps {
                 dir('ey-expense-manager-ui') {
                     withSonarQubeEnv('SonarQube') {
