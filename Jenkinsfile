@@ -169,9 +169,7 @@ pipeline {
                     sh 'npm run build -- --configuration=production'
                 }
             }
-        }
-
-        stage('Frontend - Test') {
+        }        stage('Frontend - Test') {
             steps {
                 dir('ey-expense-manager-ui') {
                     sh 'export CHROME_BIN=/usr/bin/chromium && npm test -- --watch=false --browsers=ChromeHeadless'
@@ -190,7 +188,9 @@ pipeline {
                     }
                 }
             }
-        }        stage('Docker Build & Publish') {
+        }
+        
+        stage('Docker Build & Publish') {
             steps {
                 // Use the Docker socket from the host with sudo
                 sh '''
