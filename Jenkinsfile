@@ -238,23 +238,11 @@ pipeline {
                     '''
                 }
             }
-        }        stage('Deploy to Development') {
+        }
+
+        stage('Deploy to Development') {
             steps {
-                sh '''
-                    # Export DB_PASSWORD for docker-compose
-                    export DB_PASSWORD=${DB_PASSWORD:-StrongPassword123!}
-                    
-                    # Try running docker-compose normally first
-                    if ! docker-compose -f docker-compose.dev.yml up -d; then
-                        echo "Trying with sudo..."
-                        sudo docker-compose -f docker-compose.dev.yml up -d
-                    fi
-                    
-                    echo "Development environment deployed:"
-                    if command -v docker ps &> /dev/null; then
-                        docker ps || sudo docker ps
-                    fi
-                '''
+                sh 'docker-compose -f docker-compose.dev.yml up -d'
             }
         }
     }
