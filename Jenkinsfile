@@ -28,11 +28,11 @@ pipeline {
                     echo "Installing system dependencies..."
                     apt-get update -y
                     apt-get install -y wget curl unzip apt-transport-https ca-certificates
+                      # Install Chromium for Angular tests
+                    echo "Installing Chromium for Angular tests..."
+                    apt-get install -y chromium
                     
-                    # Install Chromium for Angular tests
-                    echo "Installing Chromium for Angular tests..."                    apt-get install -y chromium
-                    
-                    # Check if Docker is available(without installing)
+                    # Check if Docker is available (without installing)
                     echo "Checking Docker availability..."
                     if command -v docker &> /dev/null; then
                         echo "Docker command found, checking permissions..."
@@ -256,24 +256,31 @@ pipeline {
                             
                             if [ $SONAR_BEGIN_STATUS -ne 0 ]; then
                                 echo "SonarQube analysis begin failed. Trying with full path..."
+                                  # Try different paths to find dotnet-sonarscanner one by one
+                                # Use individual variables instead of arrays which may not be supported in sh
+                                SCANNER_PATH_1="$HOME/.dotnet/tools/dotnet-sonarscanner"
+                                SCANNER_PATH_2="/tmp/dotnet_cli_home/.dotnet/tools/dotnet-sonarscanner"
+                                SCANNER_PATH_3="$WORKSPACE/tools/.dotnet/tools/dotnet-sonarscanner"
                                 
-                                # Try different paths to find dotnet-sonarscanner
-                                SCANNER_PATHS=(
-                                  "$HOME/.dotnet/tools/dotnet-sonarscanner"
-                                  "/tmp/dotnet_cli_home/.dotnet/tools/dotnet-sonarscanner"
-                                  "$WORKSPACE/tools/.dotnet/tools/dotnet-sonarscanner"
-                                )
+                                # Try first path
+                                if [ -f "$SCANNER_PATH_1" ]; then
+                                    echo "Found sonarscanner at $SCANNER_PATH_1"
+                                    $SCANNER_PATH_1 begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"
+                                    SONAR_BEGIN_STATUS=$?
+                                fi
                                 
-                                for scanner_path in "${SCANNER_PATHS[@]}"; do
-                                    if [ -f "$scanner_path" ]; then
-                                        echo "Found sonarscanner at $scanner_path"
-                                        $scanner_path begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"
-                                        SONAR_BEGIN_STATUS=$?
-                                        if [ $SONAR_BEGIN_STATUS -eq 0 ]; then
-                                            break
-                                        fi
-                                    fi
-                                done
+                                # Try second path if first failed
+                                if [ $SONAR_BEGIN_STATUS -ne 0 ] && [ -f "$SCANNER_PATH_2" ]; then
+                                    echo "Found sonarscanner at $SCANNER_PATH_2"
+                                    $SCANNER_PATH_2 begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"
+                                    SONAR_BEGIN_STATUS=$?
+                                fi
+                                  # Try third path if still failed
+                                if [ $SONAR_BEGIN_STATUS -ne 0 ] && [ -f "$SCANNER_PATH_3" ]; then
+                                    echo "Found sonarscanner at $SCANNER_PATH_3"
+                                    $SCANNER_PATH_3 begin /k:"ey-expense-manager" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.login="${SONAR_AUTH_TOKEN}" /n:"EY Expense Manager" /v:"1.0.0"
+                                    SONAR_BEGIN_STATUS=$?
+                                fi
                             fi
                             
                             # If SonarQube begin still failed, proceed with build anyway
@@ -327,16 +334,23 @@ pipeline {
                             export PATH="$PATH:/opt/sonar-scanner/bin:$HOME/sonar-scanner/bin:$WORKSPACE/tools/sonar-scanner/bin"
                             
                             echo "Checking SonarScanner CLI availability..."
-                            
-                            # Find sonar-scanner executable
+                              # Find sonar-scanner executable - check each path individually
                             SONAR_SCANNER=""
-                            for path in "/opt/sonar-scanner/bin/sonar-scanner" "/usr/local/bin/sonar-scanner" "$HOME/sonar-scanner/bin/sonar-scanner" "$WORKSPACE/tools/sonar-scanner/bin/sonar-scanner"; do
-                                if [ -f "$path" ]; then
-                                    SONAR_SCANNER="$path"
-                                    echo "Found sonar-scanner at $SONAR_SCANNER"
-                                    break
-                                fi
-                            done
+                            
+                            # Check each path one by one without using arrays or for loops
+                            if [ -f "/opt/sonar-scanner/bin/sonar-scanner" ]; then
+                                SONAR_SCANNER="/opt/sonar-scanner/bin/sonar-scanner"
+                                echo "Found sonar-scanner at $SONAR_SCANNER"
+                            elif [ -f "/usr/local/bin/sonar-scanner" ]; then
+                                SONAR_SCANNER="/usr/local/bin/sonar-scanner"
+                                echo "Found sonar-scanner at $SONAR_SCANNER"
+                            elif [ -f "$HOME/sonar-scanner/bin/sonar-scanner" ]; then
+                                SONAR_SCANNER="$HOME/sonar-scanner/bin/sonar-scanner"
+                                echo "Found sonar-scanner at $SONAR_SCANNER"
+                            elif [ -f "$WORKSPACE/tools/sonar-scanner/bin/sonar-scanner" ]; then
+                                SONAR_SCANNER="$WORKSPACE/tools/sonar-scanner/bin/sonar-scanner"
+                                echo "Found sonar-scanner at $SONAR_SCANNER"
+                            fi
                             
                             # If sonar-scanner wasn't found, try to find it in PATH
                             if [ -z "$SONAR_SCANNER" ]; then
@@ -393,7 +407,8 @@ pipeline {
                         sudo usermod -aG docker jenkins || echo "Could not add jenkins to docker group"
                     fi
                     
-                    # Set appropriate permissions for Docker socket                    if [ -e /var/run/docker.sock ]; then
+                    # Set appropriate permissions for Docker socket
+                    if [ -e /var/run/docker.sock ]; then
                         echo "Setting permissions for Docker socket"
                         sudo chmod 666 /var/run/docker.sock || echo "Could not set permissions on Docker socket"
                         echo "Current permissions for Docker socket:"
@@ -415,7 +430,8 @@ pipeline {
                         echo "Docker socket permissions: $(ls -la /var/run/docker.sock || echo 'Docker socket not available')"
                         
                         # Try to build Docker image, but don't fail the pipeline if Docker isn't working
-                        echo "Attempting to build backend Docker image..."                        if docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
+                        echo "Attempting to build backend Docker image..."
+                        if docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
                             echo "Docker build succeeded normally"
                             docker tag eyexpensemanager-api:${BUILD_NUMBER} eyexpensemanager-api:latest || echo "Failed to tag image"
                         elif sudo docker build -t eyexpensemanager-api:${BUILD_NUMBER} -f Dockerfile .; then
