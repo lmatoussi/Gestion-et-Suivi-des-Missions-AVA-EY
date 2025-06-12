@@ -30,7 +30,7 @@ Write-Host "Visit http://localhost:9000 for SonarQube and http://localhost:8080 
 # 4. Validate Angular dependencies
 Write-Host "4. Validating Angular dependencies..." -ForegroundColor Yellow
 $packageJson = Get-Content -Path ".\ey-expense-manager-ui\package.json" -Raw
-if ($packageJson -match '"zone.js": "~0.14.0"') {
+if ($packageJson -match '"zone.js": "~0.15.0"') {
     Write-Host "Zone.js version has been updated correctly." -ForegroundColor Green
 } else {
     Write-Host "Warning: Zone.js version may not be updated correctly." -ForegroundColor Red
