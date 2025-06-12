@@ -149,12 +149,20 @@ pipeline {
                     }
                 }
             }
-        }
-
-        stage('Frontend - Install Dependencies') {
+        }        stage('Frontend - Install Dependencies') {
             steps {
                 dir('ey-expense-manager-ui') {
-                    sh 'npm install'
+                    sh '''
+                        # Try normal install first
+                        echo "Trying npm install..."
+                        npm install || echo "Standard npm install failed, trying with legacy-peer-deps..."
+                        
+                        # If it fails, try with legacy-peer-deps
+                        if [ $? -ne 0 ]; then
+                            echo "Using legacy-peer-deps to resolve dependency conflicts..."
+                            npm install --legacy-peer-deps
+                        fi
+                    '''
                 }
             }
         }
