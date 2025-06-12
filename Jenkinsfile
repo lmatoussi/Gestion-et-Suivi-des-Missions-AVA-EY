@@ -98,14 +98,30 @@ pipeline {
                     # Create symlink to ensure the tool is accessible
                     mkdir -p $HOME/.dotnet/tools || true
                     ln -sf /tmp/dotnet_cli_home/.dotnet/tools/dotnet-sonarscanner $HOME/.dotnet/tools/dotnet-sonarscanner || true
-                    
-                    # Install SonarScanner CLI if needed
+                      # Install SonarScanner CLI if needed
                     if ! command -v sonar-scanner &> /dev/null; then
                         echo "Installing SonarScanner CLI..."
-                        mkdir -p /opt/sonar-scanner
+                        # Clean up any previous installation first to avoid directory conflicts
+                        rm -rf /opt/sonar-scanner || true
+                        
+                        # Download and extract SonarScanner
+                        echo "Downloading SonarScanner..."
                         curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip -o sonar-scanner.zip
+                        
+                        echo "Extracting SonarScanner..."
                         unzip -o sonar-scanner.zip -d /opt
-                        mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+                        
+                        echo "Setting up SonarScanner..."
+                        # Rename the directory directly instead of moving it into another directory
+                        if [ -d "/opt/sonar-scanner-4.8.0.2856-linux" ]; then
+                            mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+                        else
+                            echo "Warning: Expected directory /opt/sonar-scanner-4.8.0.2856-linux not found after extraction"
+                            # Create directory anyway if extraction doesn't follow expected pattern
+                            mkdir -p /opt/sonar-scanner
+                        fi
+                        
+                        # Create symbolic link and clean up
                         ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner
                         rm sonar-scanner.zip
                     fi
